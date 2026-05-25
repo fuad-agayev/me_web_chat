@@ -28,7 +28,7 @@ const submit = async () => {
 
     <div class="card">
 
-      <h1>Login</h1>
+      <h1 class="bg-red-500">Login</h1>
       <p class="subtitle">Welcome back 👋</p>
 
       <input
