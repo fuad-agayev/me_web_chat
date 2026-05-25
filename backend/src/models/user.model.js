@@ -43,7 +43,7 @@ export const UserModel = {
       WHERE id = $2`,
       [avatar, userId]
     );
-  };
+  }
 
 
 

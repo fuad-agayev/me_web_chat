@@ -8,7 +8,8 @@
 <script setup lang="ts">
 import { ref } from "vue";
 
-const backendUrl = "http://localhost:5000"; // .env-dən də oxuya bilərsən
+const config = useRuntimeConfig();
+const backendUrl = config.public.apiBase; // .env-dən də oxuya bilərsən
 const user = ref({ avatar: "" });
 
 const handleFile = async (e:any) => {

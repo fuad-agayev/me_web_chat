@@ -1,4 +1,4 @@
-import { env } from './env.js'
+import { env } from '../config/env.js'
 import multer from 'multer';
 import path from 'path';
 
