@@ -76,7 +76,8 @@ socket.on("getOnlineUsers", () => {
   socket.emit("onlineUsers", Array.from(onlineUsers));
 });
 
-//*      /------------global chat events ------------------\
+
+//      /------------global chat events ------------------\
          socket.on("joinGlobal", () => {
            globalUsers.add(userId);
 
@@ -142,7 +143,7 @@ socket.on("leaveGroup", (groupId) => {
   socket.leave(`group_${groupId}`);
 });
 
-socket.on("senGroupMessage", async ({groupId, content}) => {
+socket.on("sendGroupMessage", async ({groupId, content}) => {
    const msg = await sendGroupMessage(groupId, userId, content);
 
    io.to(`group_${groupId}`).emit("newGroupMessage", msg)

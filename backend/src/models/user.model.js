@@ -33,6 +33,23 @@ export const UserModel = {
     return r.rows[0];
   },
 
+  // Avatar 
+
+ updateAvatarModel: async (userId, avatar) => {
+    return pool.query(
+      `
+      UPDATE users 
+      SET avatar = $1
+      WHERE id = $2`,
+      [avatar, userId]
+    );
+  };
+
+
+
+
+
+
   //? 👤 ID ilə user tapmaq (profile / socket / UI üçün faydalı) Ben Email ile yapdim bunu yerine findByEmail:   ile
   // findById: async (userId) => {
   //   const r = await pool.query(

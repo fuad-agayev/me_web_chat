@@ -10,3 +10,7 @@ export const getUsers = async () => {
 export const updateLastSeen = async (userId) => {
    return await UserModel.updateLastSeen(userId)
 }
+
+export const updateAvatar = (userId, avatar) => {
+   return UserModel.updateAvatarModel(userId, avatar);
+};

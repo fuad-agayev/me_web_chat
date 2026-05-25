@@ -10,10 +10,13 @@ export const MessageModel = {
   getConversation: async (user1, user2) => {
       const r = await pool.query(
         `
-        SELECT * FROM messages
-        WHERE (sender_id=$1 AND receiver_id=$2)
-        OR (sender_id=$2 AND receiver_id=$1)
-        ORDER BY created_at ASC`,
+    SELECT m.*, u.username, u.avatar
+    FROM messages m
+    JOIN users u ON u.id = m.sender_id
+    WHERE (m.sender_id=$1 AND m.receiver_id=$2)
+       OR (m.sender_id=$2 AND m.receiver_id=$1)
+    ORDER BY m.created_at ASC
+        `,
       [user1, user2])
     return r.rows;
   },
