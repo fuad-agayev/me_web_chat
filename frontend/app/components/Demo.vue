@@ -30,8 +30,7 @@ const handleDemoLogin =
 <template>
 
   <button
-    @click="handleDemoLogin"
-  >
+    @click="handleDemoLogin" class="cursor-pointer">
     Demo Login
   </button>
 

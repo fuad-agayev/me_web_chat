@@ -13,7 +13,7 @@ export const loginDemo =
   async (): Promise<DemoResponse> => {
 
     const res = await fetch(
-      "/api/demo",
+      "http://localhost:5000/api/demo",
       {
         method: "POST",
 
