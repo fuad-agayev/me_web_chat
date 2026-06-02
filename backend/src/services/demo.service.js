@@ -6,7 +6,7 @@ import { UserModel } from '../models/user.model.js';
   export const getDemoUser = async () => {
 
   return await UserModel.findByEmail(
-    'demo@test.com'
+    'test@demo.com'
   );
 
 };

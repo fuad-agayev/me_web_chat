@@ -323,6 +323,7 @@ socket.on(
 
     
     // disconnect
+// disconnect
 socket.on("disconnect", async () => {
   setTimeout(async () => {
     const r = await updateLastSeen(userId);
@@ -333,11 +334,17 @@ socket.on("disconnect", async () => {
     io.emit("onlineUsers", Array.from(onlineUsers));
 
     // last seen
-    io.emit("userOffline", {
-      userId,
-      lastSeen: r.last_seen,
-    });
+    if (r) {
+      io.emit("userOffline", {
+        userId,
+        lastSeen: r.last_seen,
+      });
+    } else {
+      console.warn("updateLastSeen returned undefined for userId:", userId);
+    }
   }, 2000);
 });
-  });
-};
+
+});
+
+}

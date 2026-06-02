@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { reactive, ref } from "vue"
  import { useAuth } from "~/composables/useAuth";
-
+import { loginDemo } from "~/composables/demoApi";
 
  const { login } = useAuth()
 
@@ -33,8 +33,19 @@ const submit = async () => {
   }
 }
 
-const startDemo = () => {
-  console.log("DEMO BUTTON CLICKED");
+const handleDemoLogin = async () => {
+  try {
+    loading.value = true;
+    const res = await loginDemo();
+    console.log("Demo response:", res);
+    if (res.user) {
+      await navigateTo("/chat");
+    }
+  } catch (err) {
+    console.error("Demo login error:", err);
+  } finally {
+    loading.value = false;
+  }
 };
 </script>
 
@@ -146,15 +157,16 @@ const startDemo = () => {
           </svg>
         </div>
 
-        <div class="mt-8 flex justify-center w-full">
-          <button
-            @click="startDemo"
-            type="button"
-            class="bg-[#3a3f58] hover:bg-[#2e3247] text-white font-semibold py-2.5 px-10 rounded-xl transition-all duration-200 text-xs tracking-wider shadow-md active:scale-[0.98]
-            cursor-pointer">
-            Demo
-          </button>
-        </div>
+         <!-- Demo Login -->
+      <div class="pt-10 flex justify-center md:justify-start">
+       <button
+    @click="handleDemoLogin"
+    :disabled="loading"
+    class="bg-[#3a3f58] hover:bg-[#2e3247] text-white cursor-pointer font-semibold py-3 px-14 rounded-xl transition-all duration-200 text-xs tracking-wider shadow-md active:scale-[0.98]"
+  >
+    {{ loading ? "Loading Demo..." : "Demo" }}
+  </button>
+      </div>
 
       </div>
     </div>

@@ -14,7 +14,7 @@ export const getMessages = async (
 ) => {
 
   const msgs =
-    await messageModel.getMessages(
+    await MessageModel.getMessages(
       senderId,
       receiverId
     );

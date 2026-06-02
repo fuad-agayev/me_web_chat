@@ -9,23 +9,13 @@ export interface DemoResponse {
   user: DemoUser;
 }
 
-export const loginDemo =
-  async (): Promise<DemoResponse> => {
+export const loginDemo = async (): Promise<DemoResponse> => {
+  const config = useRuntimeConfig();
 
-    const res = await fetch(
-      "http://localhost:5000/api/demo",
-      {
-        method: "POST",
+  const res = await $fetch<DemoResponse>(`${config.public.apiBase}/api/demo`, {
+    method: "POST",
+    credentials: "include"
+  });
 
-        credentials: "include"
-      }
-    );
-
-    if (!res.ok) {
-      throw new Error(
-        "Demo login failed"
-      );
-    }
-
-    return await res.json();
+  return res;
 };
