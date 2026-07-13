@@ -7,7 +7,7 @@ import cloudinary from '../config/cloudinary.js';
 
 let storage;
 
-if(env.NOD_ENV === "production") {
+if(env.NODE_ENV === "production") {
    // Production + Cloudinary
    storage = new CloudinaryStorage({
       cloudinary,

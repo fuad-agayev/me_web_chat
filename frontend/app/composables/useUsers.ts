@@ -6,11 +6,12 @@ export const useUsers = () => {
   interface Users {
     id: number;
     username: string;
+    avatar?: string
   }
 
   const users = useState<Users[]>("users", () => []);
 
-  const fetchUsers = async () => {
+  const fetchUsers = async (mode?: string) => {
     const res = await request<Users[]>("/api/users");
     users.value = res as Users[];
   };

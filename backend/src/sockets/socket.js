@@ -1,6 +1,10 @@
+
 import { Server } from "socket.io";
 import cookie from "cookie";
 import { verifyAccessToken } from "../utils/jwt.js";
+import { env } from '../config/env.js';
+import { UserModel } from '../models/user.model.js';
+import { formatAvatarUrl } from '../utils/avatar.js';
 
 import {
   sendMessageService,
@@ -10,10 +14,8 @@ import {
   deleteMessageService,
 } from "../services/message.service.js";
 
-import { createGlobalMessage, editGlobalMessage, deleteGlobalMessage } from '../services/global.service.js';
-import { editGroupMessage, deleteGroupMessage, sendGroupMessage } from '../services/group.service.js';
+import { createGlobalMessage, editGlobalMessage, deleteGlobalMessage, fetchGlobalOnlineUsers } from '../services/global.service.js';
 
-import { groupModel } from '../models/group.model.js';
 
 import { reactToMessage } from '../services/reaction.service.js'
 import {  addReaction, removeReaction } from '../models/reaction.model.js'
@@ -21,12 +23,12 @@ import {  addReaction, removeReaction } from '../models/reaction.model.js'
 
 
 import { updateLastSeen } from "../services/user.service.js";
-import { env } from "../config/env.js";
+
 
 const onlineUsers = new Set();
 
 //Global Chat active zUsers
-const globalUsers = new Set();
+export const globalUsers = new Set();
 
 export const initSocket = (server) => {
   const io = new Server(server, {
@@ -39,6 +41,9 @@ export const initSocket = (server) => {
   // ======================
   // AUTH
   // ======================
+
+
+
   io.use((socket, next) => {
     try {
       const cookies = cookie.parse(socket.handshake.headers.cookie || "");
@@ -52,6 +57,9 @@ export const initSocket = (server) => {
       next(new Error("Unauthorized"));
     }
   });
+
+
+ 
 
   // ======================
   // CONNECTION
@@ -78,25 +86,67 @@ socket.on("getOnlineUsers", () => {
 
 
 //      /------------global chat events ------------------\
-         socket.on("joinGlobal", () => {
-           globalUsers.add(userId);
+        
 
-           io.emit("globalUsersCount", globalUsers.size);
-          });
+          socket.on("joinGlobal", async () => {
+  globalUsers.add(userId);
 
-
-         socket.on("leaveGlobal", () => {
-            globalUsers.delete(userId);
-
-            io.emit("globalUsersCount", globalUsers.size)
-         })
+  io.emit("globalUsersCount", globalUsers.size);
+  const onlineUsers = await fetchGlobalOnlineUsers();
+  io.emit("globalOnlineUsers", onlineUsers);
+});
 
 
-         socket.on("sendGlobalMessage", async ({content}) => {
-            const msg = await createGlobalMessage(userId, content)
+        
+  socket.on("leaveGlobal", async () => {
+          globalUsers.delete(userId);
 
-            io.emit("newGlobalMessage", msg);
-         })
+             io.emit("globalUsersCount", globalUsers.size);
+             const onlineUsers = await fetchGlobalOnlineUsers();
+               io.emit("globalOnlineUsers", onlineUsers);
+           });
+
+           
+
+socket.on("sendGlobalMessage", async ({ content }) => {
+  const msg = await createGlobalMessage(userId, content);
+  const user = await UserModel.findById(userId);
+
+  io.emit("newGlobalMessage", {
+    id: msg.id,
+    sender_id: user.id,
+    username: user.username,
+    avatar: formatAvatarUrl(user.avatar), // user.avatar → avatarPath
+    content: msg.content,
+    created_at: msg.created_at
+  });
+});
+
+
+        
+// socket.on("sendGlobalMessage", async ({ content }) => {
+//   const msg = await createGlobalMessage(userId, content);
+//   const user = await UserModel.findById(userId);
+
+//   let avatarUrl;
+//   if (env.NODE_ENV === "development") {
+//     const serverUrl = env.SERVER_URL || "http://localhost:5000";
+//     avatarUrl = user.avatar ? `${serverUrl}${user.avatar}` : null;
+//   } else {
+//     avatarUrl = user.avatar;
+//   }
+
+//   io.emit("newGlobalMessage", {
+//     id: msg.id,
+//     sender_id: user.id,
+//     username: user.username,
+//     avatar: avatarUrl,
+//     content: msg.content,
+//     created_at: msg.created_at
+//   });
+// });
+
+
 
 
          socket.on("editGlobalMessage", async ({messageId, content}) => {
@@ -111,15 +161,15 @@ socket.on("getOnlineUsers", () => {
             io.emit("globalMessageDeleted", deleted);
           })
        
-          socket.on("globalTyping", () => {
+          socket.on("globalTyping", ({userId, username}) => {
             socket.broadcast.emit("globalTyping", {
-              userId
+              userId, username
             })
           })
 
-          socket.on("globalStopTyping", async () => {
+          socket.on("globalStopTyping", async ({userId, username}) => {
              socket.broadcast.emit("globalStopTyping", {
-              userId
+              userId, username
              })
           })
 
@@ -127,100 +177,8 @@ socket.on("getOnlineUsers", () => {
 
 
 
-//    ___________  group chat events  _________________ //
-socket.on("joinGroup", async (groupId) => {
-
-  const isMember = await groupModel.isMember(groupId, userId);
-
-  if(!isMember) return; 
-
-    socket.join(`group_${groupId}`);
-
-});
-
-
-socket.on("leaveGroup", (groupId) => {
-  socket.leave(`group_${groupId}`);
-});
-
-socket.on("sendGroupMessage", async ({groupId, content}) => {
-   const msg = await sendGroupMessage(groupId, userId, content);
-
-   io.to(`group_${groupId}`).emit("newGroupMessage", msg)
-})
-
-socket.on("groupTyping", ({groupId}) => {
-      socket.to(`group_${groupId}`).emit("groupTyping", {
-        userId
-      })
-})
-
-socket.on("groupStopTyping", ({groupId}) => {
-      socket.to(`group_${groupId}`).emit("groupStopTyping", {
-        userId
-      })
-})
-
-
-socket.on("editGroupMessage", async ({ groupId, messageId, content }) => {
-
-  const msg = await editGroupMessage(
-    messageId,
-    groupId,
-    userId,
-    content
-  );
-
-  io.to(`group_${groupId}`).emit("groupMessageEdited", msg);
-});
-
-
-socket.on("deleteGroupMessage", async ({ groupId, messageId }) => {
-
-  const msg = await deleteGroupMessage(
-    messageId,
-    groupId,
-    userId
-  );
-
-  io.to(`group_${groupId}`).emit("groupMessageDeleted", msg);
-});
-
-//   ____________  group chat events _________________ //
-
 
 //   ___________________  Reactions  __________________   //
-socket.on("addGroupReaction", async ({groupId, messageId, emoji}) => {
-      const reaction = await reactToMessage(messageId, userId, emoji, groupId);
-      io.to(`group_${groupId}`).emit("groupReactionAdded", {
-        messageId, 
-        reaction,
-        emoji
-      })
-})
-
-
-socket.on(
-  "removeGroupReaction",
-  async ({ groupId, messageId, emoji }) => {
-
-    await removeReaction(
-      messageId,
-      userId,
-      emoji
-    );
-
-    io.to(`group_${groupId}`).emit(
-      "groupReactionRemoved",
-      {
-        messageId,
-        userId,
-        emoji
-      }
-    );
-  }
-);
-
 
 
 socket.on("addPrivateReaction", async ({ messageId, emoji, receiverId }) => {

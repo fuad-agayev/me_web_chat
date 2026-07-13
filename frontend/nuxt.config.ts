@@ -8,7 +8,7 @@ export default defineNuxtConfig({
  css: ['./app/assets/css/main.css'],
   vite: {
     optimizeDeps: {
-      include: ["socket.io-client", "@vue/devtools-core", "@vue/devtools-kit"]
+      include: ["socket.io-client", "@vue/devtools-core", "@vue/devtools-kit", "leaflet"]
     },
     plugins: [
       tailwindcss(),

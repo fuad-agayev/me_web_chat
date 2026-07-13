@@ -3,6 +3,7 @@ dotenv.config(); // 🔥 SADECE BURADA
 
 export const env = {
   PORT: process.env.PORT,
+  SERVER_URL: process.env.SERVER_URL,
   DB_URL: process.env.DB_URL,
   ACCESS_SECRET: process.env.ACCESS_SECRET,
   REFRESH_SECRET: process.env.REFRESH_SECRET,

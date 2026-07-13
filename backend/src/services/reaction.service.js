@@ -1,4 +1,4 @@
-import { groupModel } from '../models/group.model.js';
+
 
 import { addReaction, removeReaction } from '../models/reaction.model.js'
 
@@ -15,11 +15,10 @@ export const removeReactionFromMessage = async (
   messageId,
   userId,
   emoji,
-  groupId
 ) => {
 
   const isMember =
-    await groupModel.isMember(groupId, userId);
+    await groupModel.isMember(userId);
 
   if (!isMember) {
     throw new Error("User is not a member");

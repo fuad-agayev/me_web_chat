@@ -2,12 +2,20 @@
 import { Socket } from "socket.io-client";
 import { useApi } from "~/composables/refreshApi";
 
+
+interface Reaction {
+  id: number;
+  messageId: number;
+  userId: number;
+  emoji: string;
+}
+
 interface Message {
   id: number;
   sender_id: number;
   receiver_id: number;
   content: string;
-
+  reactions?: Reaction[];
   delivered?: boolean;
   read?: boolean;
   edited?: boolean;
@@ -51,7 +59,7 @@ export const useChat = () => {
   // ======================
   // FETCH MESSAGES
   // ======================
-  const fetchMessages = async () => {
+  const fetchMessages = async (userId: number) => {
     if (!selectedUser.value) return;
 
     const res = await request(`/api/messages/${selectedUser.value}`);
@@ -61,7 +69,7 @@ export const useChat = () => {
   // ======================
   // SEND MESSAGE
   // ======================
-  const sendMessage = (content: string) => {
+  const sendMessage = (content: string, receiverId: number) => {
     if (!selectedUser.value || !content.trim()) return;
 
     socket.emit("sendMessage", {
@@ -73,21 +81,30 @@ export const useChat = () => {
   // ======================
   // TYPING
   // ======================
-  const startTyping = () => {
+  const startTyping = (receiverId: number) => {
     if (!selectedUser.value) return;
 
     socket.emit("typing", {
-      receiver_id: selectedUser.value,
+      receiver_id:selectedUser.value,
     });
   };
 
-  const stopTyping = () => {
+  const stopTyping = (receiverId: number) => {
     if (!selectedUser.value) return;
 
     socket.emit("stopTyping", {
       receiver_id: selectedUser.value,
     });
   };
+
+
+  const addReaction = (messageId: number, emoji: string, receiverId: number) => {
+  socket.emit("addPrivateReaction", { messageId, emoji, receiverId });
+};
+
+const removeReaction = (messageId: number, emoji: string, receiverId: number) => {
+  socket.emit("removePrivateReaction", { messageId, emoji, receiverId });
+};
 
   // ======================
   // SOCKET LISTENERS
@@ -109,6 +126,9 @@ export const useChat = () => {
     socket.off("onlineUsers");
     socket.off("userOnline");
     socket.off("userOffline");
+
+    socket.off("privateReactionAdded");
+    socket.off("privateReactionRemoved");
 
     // ======================
     // CONNECT / RECONNECT
@@ -204,6 +224,21 @@ export const useChat = () => {
         (id) => id !== senderId
       );
     });
+
+    socket.on("privateReactionAdded", (reaction: Reaction) => {
+  const msg = messages.value.find(m => m.id === reaction.messageId);
+  if (msg) {
+    if (!msg.reactions) msg.reactions = [];
+    msg.reactions.push(reaction);
+  }
+});
+
+socket.on("privateReactionRemoved", ({ messageId, userId, emoji }) => {
+  const msg = messages.value.find(m => m.id === messageId);
+  if (msg && msg.reactions) {
+    msg.reactions = msg.reactions.filter(r => !(r.userId === userId && r.emoji === emoji));
+  }
+});
   };
 
   // ======================
@@ -238,6 +273,8 @@ export const useChat = () => {
     startTyping,
     stopTyping,
     initListeners,
+    addReaction,
+    removeReaction, 
 
     // helpers
     isUserOnline,

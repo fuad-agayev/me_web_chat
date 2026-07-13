@@ -4,11 +4,12 @@ import { UserModel } from '../models/user.model.js';
 import { signAccessToken, signRefreshToken } from '../utils/jwt.js';
 import { generateToken } from '../utils/crypto.js';
 
-export const registerUser = async ({username, email, password}) => {
+
+export const registerUser = async ({username, email, password, latitude, longitude}) => {
   const hash = await bcrypt.hash(password, 10);
   const token = generateToken();
 
-  const user = await UserModel.create(username, email, hash, token);
+  const user = await UserModel.create(username, email, hash, token, latitude, longitude);
   return {user, token};
 };
 

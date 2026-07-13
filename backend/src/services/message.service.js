@@ -1,5 +1,5 @@
 import { MessageModel } from '../models/message.model.js';
-
+import { getReactions } from '../models/reaction.model.js'
 export const sendMessageService = async (sender, receiver, content) => {
   return  await MessageModel.create(sender, receiver, content);
 };
@@ -8,22 +8,12 @@ export const sendMessageService = async (sender, receiver, content) => {
 //   return await MessageModel.getConversation(user1, user2);
 // };
 
-export const getMessages = async (
-  senderId,
-  receiverId
-) => {
-
-  const msgs =
-    await MessageModel.getMessages(
-      senderId,
-      receiverId
-    );
+// Doğru hali:
+export const getMessages = async (senderId, receiverId) => {
+  const msgs = await MessageModel.getConversation(senderId, receiverId);
 
   for (const msg of msgs) {
-
-    msg.reactions =
-      await reactionModel.getReactions(msg.id);
-
+    msg.reactions = await getReactions(msg.id);
   }
 
   return msgs;

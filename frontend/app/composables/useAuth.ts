@@ -5,16 +5,22 @@ export const useAuth = () => {
    const { request } = useApi();
 
   interface RegisterData {
-    username?: string;
-    email: string;
-    password: string;
-  }
+  username?: string;
+  email: string;
+  password: string;
+  latitude?: number | null;
+  longitude?: number | null;
+}
 
-  interface User {
-    id: number;
-    username: string;
-    email: string;
-  }
+interface User {
+  id: number;
+  username: string;
+  email: string;
+  avatar?: string;
+  latitude?: number | null;
+  longitude?: number | null;
+}
+
 
   const user = useState<User | null>("user", () => null);
  
@@ -31,9 +37,22 @@ export const useAuth = () => {
 
 // -------------- Profile --------------//
 const fetchProfile = async () => {
-    const res = await request("/api/auth/profile");
+    const res = await request<User>("/api/auth/profile");
+     console.log("PROFILE RESPONSE:", res);
     user.value = res;
   };
+
+
+//   const fetchProfile = async () => {
+//   const res = await request<User>("/api/auth/profile");
+//   //const serverUrl = useRuntimeConfig().public.apiBase; // məsələn http://localhost:5000
+//   user.value = {
+//     ...res,
+//     avatar: res.avatar ? `${config.public.apiBase}${res.avatar}` : null
+//   };
+// };
+
+
 // -------------- Profile --------------//
 
 
@@ -46,9 +65,10 @@ const fetchProfile = async () => {
     });
 
     // ⚠️ optional: sadece UI için
-    user.value = res;
-
-    return res;
+    //user.value = res;
+await fetchProfile(); // profil məlumatını yenilə
+  return res;
+  
   };
 // --------------  Login--------------//
 

@@ -1,60 +1,57 @@
 <template>
-  <div class="min-h-screen bg-linear-to-br from-[#0f0f1f] to-[#1b1b35] flex items-center justify-center text-white p-10">
-    <div class="max-w-2xl w-full text-center">
-      <h1 class="text-4xl md:text-5xl font-bold mb-6">Contact Us</h1>
-      <p class="text-gray-300 text-lg mb-12">
-        Have questions or feedback? Get in touch with me below.
-      </p>
+  <div class="flex flex-col items-center justify-center h-screen bg-zinc-800 text-white space-y-8">
+    <!-- Başlık -->
+    <h2 class="text-3xl font-bold bg-linear-to-r from-zinc-400 via-[#f8f2bc] to-100% bg-clip-text text-transparent">
+      HIRE ME..!
+    </h2>
 
-      <!-- Contact Cards -->
-      <div class="grid md:grid-cols-3 gap-8">
-        <!-- Email -->
-        <div class="bg-white/5 rounded-2xl p-6 shadow-xl flex flex-col items-center">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-blue-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12H8m0 0l4-4m-4 4l4 4" />
-          </svg>
-          <h2 class="text-xl font-semibold mb-2">Email</h2>
-          <p class="text-gray-400">fuad0000010@gmail.com</p>
-        </div>
+    <!-- Açıklama -->
+    <p class="bg-linear-to-t from-[#2c2c28] to-[#f8f8f3] bg-clip-text text-transparent max-w-md text-center leading-relaxed">
+      You can reach me anytime via email and phone number or  chat for support and collaboration.
+    </p>
 
-        <!-- Phone -->
-        <div class="bg-white/5 rounded-2xl p-6 shadow-xl flex flex-col items-center">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-green-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h2l3 7v5h8v-5l3-7h2" />
-          </svg>
-          <h2 class="text-xl font-semibold mb-2">Phone</h2>
-          <p class="text-gray-400">+994 55 700 14 02</p>
-        </div>
+    <!-- İletişim Bilgileri -->
+    <div class="space-y-4 text-center">
+    <!-- Phone -->
+    <p class="text-lg font-semibold flex items-center justify-center space-x-2">
+      <PhoneIcon class="w-6 h-6 text-white/50" />
+      <a href="tel:+994557001402" class="bg-linear-to-r from-zinc-400 to-zinc-700 bg-clip-text text-transparent hover:underline">+994 55 700 14 02</a>
+    </p>
 
-        <!-- GitHub -->
-        <div class="bg-white/5 rounded-2xl p-6 shadow-xl flex flex-col items-center">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-gray-300 mb-4" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.44 9.8 8.21 11.39.6.11.82-.26.82-.58v-2.17c-3.34.73-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.09-.74.08-.73.08-.73 1.21.09 1.85 1.24 1.85 1.24 1.07 1.84 2.81 1.31 3.5 1 .11-.77.42-1.31.76-1.61-2.67-.3-5.47-1.34-5.47-5.95 0-1.31.47-2.38 1.24-3.22-.12-.3-.54-1.52.12-3.17 0 0 1-.32 3.3 1.23a11.5 11.5 0 013 0c2.3-1.55 3.3-1.23 3.3-1.23.66 1.65.24 2.87.12 3.17.77.84 1.24 1.91 1.24 3.22 0 4.62-2.81 5.65-5.49 5.95.43.37.82 1.1.82 2.22v3.29c0 .32.22.69.82.58C20.56 21.8 24 17.3 24 12c0-6.63-5.37-12-12-12z"/>
-          </svg>
-          <h2 class="text-xl font-semibold mb-2">GitHub</h2>
-          <p class="text-gray-400">
-  <a 
-    href="https://github.com/fuad-agayev" 
-    target="_blank" 
-    rel="noopener noreferrer" 
-    class="hover:text-blue-400 underline"
-  >
-    github.com/fuad-agayev
-  </a>
-</p>
+    <!-- Email -->
+    <p class="text-lg font-semibold flex items-center justify-center space-x-2">
+      <EnvelopeIcon class="w-6 h-6 text-white/50" />
+      <a href="mailto:fuad0000010@gmail.com" class="bg-linear-to-r from-zinc-400 via-[#9e9967] bg-clip-text text-transparent hover:underline">fuad0000010@gmail.com</a>
+    </p>
+  </div>
 
-        </div>
-      </div>
-
-      <!-- Back Link -->
-      <NuxtLink 
-        to="/" 
-        class="mt-12 inline-block bg-white/10 hover:bg-white/20 text-white px-6 py-2 rounded-xl shadow-lg transition"
-      >
-        ← Back to Home
-      </NuxtLink>
+    <!-- Harita -->
+    <div class="w-full max-w-xl h-64 rounded-lg overflow-hidden shadow-lg border-2 border-zinc-700">
+     <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d48633.649002384635!2d49.858278833683485!3d40.
+     37301315735348!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x40307d6bd6211cf9%3A0x343f6b5e7ae56c6b!2sBaku!5e0!3m2!1sen!2saz!4v1782224030323!5m2!1sen!2saz"
+      width="600" height="450" style="border:0;"
+     loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+       
     </div>
+
+   <!-- Back Home Button -->
+<!-- Back Home Button -->
+<NuxtLink 
+  to="/" 
+  class="flex items-center space-x-2 px-4 py-2 rounded-lg 
+         bg-linear-to-r from-zinc-400 via-[#f8f2bc] to-100% 
+         hover:bg-zinc-400 hover:text-white transition-all shadow-md"
+>
+  <ChevronLeftIcon class="w-5 h-5 text-zinc-700" />
+  <span class="text-zinc-700 font-semibold">Back Home</span>
+</NuxtLink>
+
   </div>
 </template>
+
+<script setup lang="ts">
+import {ChevronLeftIcon, PhoneIcon, EnvelopeIcon } from "@heroicons/vue/24/outline";
+</script>
+
 
 

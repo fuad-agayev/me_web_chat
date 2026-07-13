@@ -1,5 +1,6 @@
 import { registerUser, loginUser } from '../services/auth.service.js';
 import { transporter } from '../config/mail.js';
+import { pool } from '../config/db.js';
 import { UserModel } from '../models/user.model.js';
 import { env } from '../config/env.js';
 
@@ -57,10 +58,46 @@ export const login = async (req, res) => {
         }
 }
 
+//*  -------------  current_user--------------- //
 
-export const current_user = (req, res) => {
-    res.json(req.user)
-}
+export const current_user = async (req, res) => {
+  try {
+    const result = await pool.query(
+      "SELECT id, username, email, avatar, latitude, longitude FROM users WHERE id = $1",
+      [req.user.id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const user = result.rows[0];
+    let avatarUrl;
+
+    if (env.NODE_ENV === "development") {
+      // Localhost üçün tam URL düzəlt
+      const serverUrl = env.SERVER_URL || "http://localhost:5000";
+      avatarUrl = user.avatar ? `${serverUrl}${user.avatar}` : null;
+    } else {
+      // Production → Cloudinary URL artıq DB-də tam saxlanır
+      avatarUrl = user.avatar;
+    }
+
+    res.json({
+      id: user.id,
+      username: user.username,
+      email: user.email,
+      avatar: avatarUrl,
+      latitude: user.latitude,
+      longitude: user.longitude
+    });
+  } catch (err) {
+    res.status(500).json({ message: "Error fetching profile" });
+  }
+};
+
+
+//*  -------------  current_user--------------- //
 
 
 
