@@ -17,7 +17,7 @@ import {
 import { createGlobalMessage, editGlobalMessage, deleteGlobalMessage, fetchGlobalOnlineUsers } from '../services/global.service.js';
 
 
-import { reactToMessage } from '../services/reaction.service.js'
+//import { reactToMessage, removeReactionFromMessage } from '../services/reaction.service.js'
 import {  addReaction, removeReaction } from '../models/reaction.model.js'
 
 
@@ -178,49 +178,60 @@ socket.on("sendGlobalMessage", async ({ content }) => {
 
 
 
-//   ___________________  Reactions  __________________   //
-
+// _________________________    REACTIONS ______________________ \\
 
 socket.on("addPrivateReaction", async ({ messageId, emoji, receiverId }) => {
-  const reaction = await addReaction(messageId, userId, emoji);
+  try {
+    const cleanMessageId = parseInt(messageId, 10);
+    const cleanUserId = parseInt(userId, 10); // Sokete bağlanan aktif kullanıcının ID'si (Soket oturumundan alınmalı)
 
-  io.to(`user_${userId}`).emit("privateReactionAdded", reaction);
-  io.to(`user_${receiverId}`).emit("privateReactionAdded", reaction);
+    // Backend modelini çağırıp veritabanına yazıyoruz
+    const reaction = await addReaction(cleanMessageId, cleanUserId, emoji);
+
+    const payload = {
+      id: reaction?.id,
+      messageId: cleanMessageId,
+      message_id: cleanMessageId,
+      userId: cleanUserId,
+      user_id: cleanUserId,
+      emoji: emoji
+    };
+
+    // Hem gönderene hem alıcıya odaları üzerinden anında fırlatıyoruz
+    io.to(`user_${cleanUserId}`).emit("privateReactionAdded", payload);
+    io.to(`user_${receiverId}`).emit("privateReactionAdded", payload);
+  } catch (error) {
+    console.error("Reaksiyon eklenirken soket hatası:", error);
+  }
 });
 
+// --- REAKSİYON SİLME SOKETİ ---
+socket.on("removePrivateReaction", async ({ messageId, emoji, receiverId }) => {
+  try {
+    const cleanMessageId = parseInt(messageId, 10);
+    const cleanUserId = parseInt(userId, 10);
 
+    // Backend modelindeki removeReaction fonksiyonunu tetikliyoruz
+    await removeReaction(cleanMessageId, cleanUserId, emoji);
 
-socket.on(
-  "removePrivateReaction",
-  async ({ messageId, emoji, receiverId }) => {
+    const payload = {
+      messageId: cleanMessageId,
+      message_id: cleanMessageId,
+      userId: cleanUserId,
+      user_id: cleanUserId,
+      emoji: emoji
+    };
 
-    await removeReaction(
-      messageId,
-      userId,
-      emoji
-    );
-
-    io.to(`user_${userId}`).emit(
-      "privateReactionRemoved",
-      {
-        messageId,
-        userId,
-        emoji
-      }
-    );
-
-    io.to(`user_${receiverId}`).emit(
-      "privateReactionRemoved",
-      {
-        messageId,
-        userId,
-        emoji
-      }
-    );
+    // İki tarafa da silindi bilgisini anında gönderiyoruz
+    io.to(`user_${cleanUserId}`).emit("privateReactionRemoved", payload);
+    io.to(`user_${receiverId}`).emit("privateReactionRemoved", payload);
+  } catch (error) {
+    console.error("Reaksiyon silinirken soket hatası:", error);
   }
-);
+});
 
-//   ___________________  Reactions  __________________//
+// _________________________    REACTIONS ______________________ ||
+
 
     // ======================
     // MESSAGE
@@ -280,7 +291,6 @@ socket.on(
     });
 
     
-    // disconnect
 // disconnect
 socket.on("disconnect", async () => {
   setTimeout(async () => {

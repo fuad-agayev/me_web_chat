@@ -6,7 +6,9 @@ import { useApi } from "~/composables/refreshApi";
 interface Reaction {
   id: number;
   messageId: number;
+  //message_id?: number;
   userId: number;
+ // user_id?: number;
   emoji: string;
 }
 
@@ -133,26 +135,41 @@ const removeReaction = (messageId: number, emoji: string, receiverId: number) =>
     // ======================
     // CONNECT / RECONNECT
     // ======================
-    socket.on("connect", () => {
-      socket.emit("getOnlineUsers");
-    });
+    
+     socket.on("connect", () => {
+    socket.emit("getOnlineUsers");
+     });
 
     // ======================
     // ONLINE USERS (MAIN SOURCE)
     // ======================
-    socket.on("onlineUsers", (users: number[]) => {
-      onlineUsers.value = users;
-    });
+    // socket.on("onlineUsers", (users: number[]) => {
+    //   onlineUsers.value = users;
+    // });
 
-    // instant online event (optional but useful)
-    socket.on("userOnline", ({ userId }: UserOnlinePayload) => {
-      if (!onlineUsers.value.includes(userId)) {
-        onlineUsers.value.push(userId);
-      }
+    // // instant online event (optional but useful)
+    // socket.on("userOnline", ({ userId }: UserOnlinePayload) => {
+    //   if (!onlineUsers.value.includes(userId)) {
+    //     onlineUsers.value.push(userId);
+    //   }
 
-      // online oldusa lastSeen sil
-      userLastSeen.value[userId] = null;
-    });
+    //   // online oldusa lastSeen sil
+    //   userLastSeen.value[userId] = null;
+    // });
+
+
+socket.on("onlineUsers", (users: number[]) => {
+  onlineUsers.value = [...users];
+});
+
+socket.on("userOnline", ({ userId }) => {
+  if (!onlineUsers.value.includes(userId)) {
+    onlineUsers.value.push(userId);
+  }
+  userLastSeen.value[userId] = null;
+});
+
+
 
     // offline + last seen
     socket.on("userOffline", ({ userId, lastSeen }: UserOfflinePayload) => {
@@ -225,20 +242,62 @@ const removeReaction = (messageId: number, emoji: string, receiverId: number) =>
       );
     });
 
-    socket.on("privateReactionAdded", (reaction: Reaction) => {
-  const msg = messages.value.find(m => m.id === reaction.messageId);
-  if (msg) {
-    if (!msg.reactions) msg.reactions = [];
-    msg.reactions.push(reaction);
-  }
+
+
+// --- REAKSİYON EKLEME ---
+
+socket.on("privateReactionAdded", (reaction: any) => {
+  const targetMsgId = Number(reaction.messageId || reaction.message_id);
+  const reactorUserId = Number(reaction.userId || reaction.user_id);
+
+  // Mevcut mesajlar dizisinin tamamen yeni bir referans kopyasını oluşturuyoruz (Reaktiviteyi zorlamak için)
+  messages.value = messages.value.map(msg => {
+    if (Number(msg.id) === targetMsgId) {
+      const currentReactions = msg.reactions ? [...msg.reactions] : [];
+      
+      // Aynı kullanıcının bu mesajdaki eski reaksiyonunu filtrele
+      const filtered = currentReactions.filter(
+        (r: any) => !(Number(r.userId || r.user_id) === reactorUserId && r.emoji === reaction.emoji)
+      );
+
+      // Yeni reaksiyonu ekle
+      filtered.push({
+        userId: reactorUserId,
+        user_id: reactorUserId,
+        messageId: targetMsgId,
+        message_id: targetMsgId,
+        emoji: reaction.emoji
+      } as any);
+
+      return { ...msg, reactions: filtered };
+    }
+    return msg;
+  });
 });
 
-socket.on("privateReactionRemoved", ({ messageId, userId, emoji }) => {
-  const msg = messages.value.find(m => m.id === messageId);
-  if (msg && msg.reactions) {
-    msg.reactions = msg.reactions.filter(r => !(r.userId === userId && r.emoji === emoji));
-  }
+// --- REAKSİYON SİLME ---
+
+socket.on("privateReactionRemoved", (data: any) => {
+  const targetMsgId = Number(data.messageId || data.message_id);
+  const reactorUserId = Number(data.userId || data.user_id);
+  const emoji = data.emoji;
+
+  messages.value = messages.value.map(msg => {
+    if (Number(msg.id) === targetMsgId) {
+      const currentReactions = msg.reactions ? [...msg.reactions] : [];
+      
+      // Silinen emojiyi diziden ayıklıyoruz
+      const filtered = currentReactions.filter(
+        (r: any) => !(Number(r.userId || r.user_id) === reactorUserId && r.emoji === emoji)
+      );
+
+      return { ...msg, reactions: filtered };
+    }
+    return msg;
+  });
 });
+
+
   };
 
   // ======================
@@ -282,4 +341,3 @@ socket.on("privateReactionRemoved", ({ messageId, userId, emoji }) => {
     getLastSeen,
   };
 };
-

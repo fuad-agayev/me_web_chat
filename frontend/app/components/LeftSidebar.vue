@@ -1,7 +1,7 @@
 
 
 <template>
-  <div class="my-auto ml-8">
+  <div class="my-auto">
     <!-- LEFT SIDEBAR -->
     <aside class="w-16 h-[80vh] my-auto rounded-xl flex flex-col items-center justify-between py-4 
                    bg-linear-to-t from-zinc-400 via-[#a7a374] to-zinc-500  shadow-lg shadow-zinc-700/70">

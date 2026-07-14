@@ -23,7 +23,7 @@ export const MessageModel = {
 
   markedAsRead: async (messageId) => {
     const r = await pool.query("UPDATE messages SET read = true, read_at = NOW() WHERE id = $1 RETURNING *", 
-      [[messageId]]
+      [Number[messageId]]
     )
       return r.rows[0];
   },

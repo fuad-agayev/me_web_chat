@@ -1,191 +1,331 @@
-
 <script setup lang="ts">
+import { ref, watch, onMounted, nextTick } from "vue";
 import { useChat } from "~/composables/useChat";
 import { useAuth } from "~/composables/useAuth";
-import { nextTick, ref, watch, onMounted } from "vue";
 
-const props = defineProps<{ selectedUser: any }>();
+const props = defineProps<{
+  selectedUser: {
+    id: number;
+    username: string;
+    email: string;
+    avatar?: string;
+  } | null;
+}>();
 
-const { 
-  messages, 
-  sendMessage, 
-  fetchMessages, 
-  initListeners, 
-  startTyping, 
-  stopTyping 
+const { user } = useAuth(); 
+const {
+  messages,
+  selectedUser: chatSelectedUser,
+  fetchMessages,
+  sendMessage,
+  startTyping,
+  stopTyping,
+  initListeners,
+  addReaction,
+  removeReaction,
+  isUserTyping,
+  isUserOnline
 } = useChat();
 
-const { user } = useAuth();
-
-const text = ref("");
+const messageInput = ref("");
 const editingMessageId = ref<number | null>(null);
-const editText = ref("");
-const messagesContainer = ref<HTMLDivElement | null>(null);
-const shouldAutoScroll = ref(true);
+const editInput = ref("");
+const activeEmojiMenuId = ref<number | null>(null);
 
-// Selected user değiştiğinde mesajları getir
-watch(() => props.selectedUser?.id, async (newId) => {
-  if (!newId) return;
-  await fetchMessages(newId);
-  scrollToBottom();
-}, { immediate: true });
+const messageListRef = ref<HTMLElement | null>(null);
+const quickEmojis = ["👍", "❤️", "😂", "😮", "😢", "🙏"];
 
-onMounted(() => {
-  initListeners();
-});
+const markAllAsRead = () => {
+  if (!props.selectedUser || !messages.value.length) return;
+  const { $socket } = useNuxtApp();
+  
+  const unreadMessages = messages.value.filter(
+    m => Number(m.sender_id) === Number(props.selectedUser!.id) && !m.read
+  );
+  
+  unreadMessages.forEach(msg => {
+    ($socket as any).emit("messageRead", {
+      messageId: Number(msg.id),
+      senderId: Number(props.selectedUser!.id)
+    });
+    msg.read = true;
+  });
+};
 
-// Scroll Kontrolü
 const scrollToBottom = async () => {
   await nextTick();
-  if (messagesContainer.value && shouldAutoScroll.value) {
-    messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight;
+  if (messageListRef.value) {
+    messageListRef.value.scrollTop = messageListRef.value.scrollHeight;
   }
 };
 
-const onScroll = () => {
-  const container = messagesContainer.value;
-  if (!container) return;
-  shouldAutoScroll.value = container.scrollTop + container.clientHeight > container.scrollHeight - 150;
-};
+watch(() => props.selectedUser, async (newUser) => {
+  if (newUser) {
+    chatSelectedUser.value = Number(newUser.id);
+    await fetchMessages(newUser.id);
+    initListeners();
+    scrollToBottom();
+    markAllAsRead();
+  } else {
+    chatSelectedUser.value = null;
+  }
+}, { immediate: true });
 
-// ==================== SEND MESSAGE ====================
-const send = () => {
-  if (!text.value.trim() || !props.selectedUser?.id) return;
-
-  // Composable üzerinden gönder (doğru yol)
-  sendMessage(text.value, props.selectedUser.id);
-
-  text.value = "";
-  shouldAutoScroll.value = true;
+watch(messages, () => {
   scrollToBottom();
+  markAllAsRead();
+}, { deep: true });
+
+onMounted(() => {
+  initListeners();
+  scrollToBottom();
+});
+
+let typingTimeout: NodeJS.Timeout;
+const handleKeyDown = () => {
+  if (!props.selectedUser) return;
+  startTyping(props.selectedUser.id);
+  
+  clearTimeout(typingTimeout);
+  typingTimeout = setTimeout(() => {
+    stopTyping(props.selectedUser!.id);
+  }, 2000);
 };
 
-// Typing
-const handleTyping = () => {
-  if (!props.selectedUser?.id) return;
-  text.value.trim() 
-    ? startTyping(props.selectedUser.id) 
-    : stopTyping(props.selectedUser.id);
+const handleSend = () => {
+  if (!messageInput.value.trim() || !props.selectedUser) return;
+  sendMessage(messageInput.value, props.selectedUser.id);
+  messageInput.value = "";
+  stopTyping(props.selectedUser.id);
 };
 
-// Edit
-const startEdit = (m: any) => {
-  editingMessageId.value = m.id;
-  editText.value = m.content;
+const startEdit = (msg: any) => {
+  editingMessageId.value = msg.id;
+  editInput.value = msg.content;
 };
 
-const saveEdit = () => {
-  if (!editingMessageId.value || !props.selectedUser?.id) return;
-  const socket = useNuxtApp().$socket;
-  socket.emit("editMessage", {
-    messageId: editingMessageId.value,
-    content: editText.value,
-    receiver_id: props.selectedUser.id,
+const saveEdit = (msgId: number) => {
+  if (!editInput.value.trim() || !props.selectedUser) return;
+  const { $socket } = useNuxtApp();
+  ($socket as any).emit("editMessage", {
+    messageId: msgId,
+    content: editInput.value,
+    receiverId: props.selectedUser.id
   });
   editingMessageId.value = null;
-  editText.value = "";
 };
 
-const cancelEdit = () => {
-  editingMessageId.value = null;
-  editText.value = "";
-};
-
-const removeMessage = (id: number) => {
-  if (!props.selectedUser?.id) return;
-  const socket = useNuxtApp().$socket;
-  socket.emit("deleteMessage", {
-    messageId: id,
-    receiver_id: props.selectedUser.id,
+const deleteMsg = (msgId: number) => {
+  if (!props.selectedUser) return;
+  const { $socket } = useNuxtApp();
+  ($socket as any).emit("deleteMessage", {
+    messageId: msgId,
+    receiverId: props.selectedUser.id
   });
 };
 
-watch(messages, scrollToBottom, { deep: true });
+
+
+
+const toggleReaction = (msgId: number, emoji: string) => {
+  if (!props.selectedUser || !user.value) return;
+  
+  const msg = messages.value.find(m => Number(m.id) === Number(msgId));
+  if (!msg) return;
+
+  const currentUserId = Number(user.value.id || (user.value as any)._id);
+  
+  // Döngü içinde her bir reaksiyonun kime ait olduğunu kontrol et
+  const existingReaction = msg.reactions?.find((r: any) => {
+    const rUserId = Number(r.userId || r.user_id);
+    return rUserId === currentUserId && r.emoji.trim() === emoji.trim();
+  });
+
+  if (existingReaction) {
+    // EĞER VARSA SİL
+    removeReaction(Number(msgId), emoji, Number(props.selectedUser.id));
+  } else {
+    // YOKSA EKLE
+    addReaction(Number(msgId), emoji, Number(props.selectedUser.id));
+  }
+  
+  activeEmojiMenuId.value = null; 
+};
+
+
+
+const toggleEmojiMenu = (msgId: number) => {
+  activeEmojiMenuId.value = activeEmojiMenuId.value === msgId ? null : msgId;
+};
 </script>
 
 <template>
-  <div class="flex flex-col h-full bg-zinc-900 rounded-2xl overflow-hidden border border-zinc-800">
+  <div class="flex flex-col h-full bg-zinc-950 rounded-xl overflow-hidden border border-zinc-700">
     
-    <!-- Header -->
-    <div class="flex items-center gap-3 p-4 border-b border-zinc-800 bg-zinc-800">
-      <img 
-        :src="selectedUser?.avatar || '/default-avatar.png'" 
-        class="w-10 h-10 rounded-2xl ring-2 ring-zinc-700"
-      />
-      <div>
-        <h3 class="font-semibold text-white">{{ selectedUser?.username }}</h3>
-        <p class="text-xs text-emerald-400">● Online</p>
+    <div v-if="selectedUser" class="flex items-center justify-between px-6 py-4 bg-zinc-900 border-b border-zinc-700">
+      <div class="flex items-center gap-3">
+        <img 
+          :src="selectedUser.avatar || '/default-avatar.png'" 
+          class="w-10 h-10 rounded-full object-cover border border-zinc-600"
+          alt="Avatar"
+        />
+        <div>
+          <h2 class="text-base font-bold text-white">{{ selectedUser.username }}</h2>
+          <p v-if="isUserTyping(selectedUser.id)" class="text-xs text-green-400 animate-pulse font-medium">
+            yazıyor...
+          </p>
+          <p v-else class="text-xs text-zinc-400">Özel Sohbet</p>
+        </div>
       </div>
     </div>
 
-    <!-- Messages -->
-    <div 
-      ref="messagesContainer"
-      class="flex-1 overflow-y-auto p-5 space-y-7 scrollbar-thin scrollbar-thumb-zinc-700 bg-zinc-950"
-      @scroll="onScroll"
-    >
-      <div v-for="m in messages" :key="m.id" 
-           :class="m.sender_id === user?.id ? 'flex justify-end' : 'flex justify-start'">
+    <div v-if="!selectedUser" class="flex-1 flex flex-col items-center justify-center text-zinc-500 p-8">
+      <span class="text-4xl mb-2">💬</span>
+      <p class="text-lg font-semibold"> Begin chats </p>
+      <p class="text-sm text-zinc-600">Select user to chat.</p>
+    </div>
 
-        <!-- Diğer kişinin mesajı (SOL) -->
-        <div v-if="m.sender_id !== user?.id" class="flex gap-3 max-w-[75%]">
+    <div v-else ref="messageListRef" class="flex-1 overflow-y-auto p-4 space-y-6 bg-zinc-900/40">
+      
+      <div 
+        v-for="msg in messages" 
+        :key="msg.id" 
+        class="flex flex-col max-w-[85%]"
+        :class="Number(msg.sender_id) === Number(user?.id || (user as any)?._id) ? 'ml-auto items-end' : 'mr-auto items-start'"
+      >
+        <div class="flex items-end gap-2 w-full" :class="Number(msg.sender_id) === Number(user?.id || (user as any)?._id) ? 'justify-end' : 'justify-start'">
+          
           <img 
-            :src="selectedUser?.avatar || '/default-avatar.png'" 
-            class="w-9 h-9 rounded-2xl flex-shrink-0 mt-1 ring-2 ring-zinc-700"
+            v-if="Number(msg.sender_id) !== Number(user?.id || (user as any)?._id)"
+            :src="selectedUser.avatar || '/default-avatar.png'"
+            class="w-8 h-8 rounded-full object-cover border border-zinc-700 mr-1 shrink-0 mb-1"
+            alt="Partner avatar"
           />
-          <div>
-            <div class="bg-zinc-800 px-5 py-3 rounded-3xl rounded-bl-none text-[15px] text-zinc-100">
-              {{ m.content }}
-              <small v-if="m.edited" class="text-xs text-zinc-500"> (edited)</small>
+
+          <div 
+            v-if="Number(msg.sender_id) === Number(user?.id || (user as any)?._id) && !msg.deleted && editingMessageId !== msg.id"
+            class="flex items-center gap-2 mr-1 bg-zinc-900/60 p-1 rounded-lg border border-zinc-800 shrink-0"
+          >
+            <button @click="startEdit(msg)" class="text-zinc-400 hover:text-blue-400 text-xs cursor-pointer" title="Düzenle">✏️</button>
+            <button @click="deleteMsg(msg.id)" class="text-zinc-400 hover:text-red-400 text-xs cursor-pointer" title="Sil">🗑️</button>
+          </div>
+
+          <div class="relative">
+            
+            <div 
+              v-if="activeEmojiMenuId === msg.id && !msg.deleted"
+              class="absolute flex items-center gap-1.5 bg-zinc-800 border border-zinc-600 rounded-full px-2.5 py-1.5 shadow-2xl z-30 -top-12 transition-all"
+              :class="Number(msg.sender_id) === Number(user?.id || (user as any)?._id) ? 'right-0' : 'left-0'"
+            >
+              <button 
+                v-for="emoji in quickEmojis" 
+                :key="emoji"
+                @click="toggleReaction(msg.id, emoji)"
+                class="hover:scale-130 active:scale-95 transition text-sm px-1 py-0.5 cursor-pointer"
+              >
+                {{ emoji }}
+              </button>
             </div>
-            <p class="text-xs text-zinc-500 mt-1 pl-2">
-              {{ new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }}
-            </p>
+
+            <div 
+              class="px-4 py-2.5 rounded-2xl text-sm shadow-md relative"
+              :class="[
+                msg.deleted 
+                  ? 'bg-zinc-800 text-zinc-500 italic border border-zinc-700/50' 
+                  : Number(msg.sender_id) === Number(user?.id || (user as any)?._id)
+                    ? 'bg-linear-to-br from-[#777c5c] to-[#585a45] text-white rounded-tr-none' 
+                    : 'bg-zinc-800 text-zinc-100 rounded-tl-none border border-zinc-700'
+              ]"
+            >
+              <div v-if="editingMessageId === msg.id" class="flex flex-col gap-2 min-w-50">
+                <input 
+                  v-model="editInput" 
+                  type="text" 
+                  class="w-full bg-zinc-700 text-white text-xs p-1.5 rounded border border-zinc-500 focus:outline-none"
+                  @keyup.enter="saveEdit(msg.id)"
+                />
+                <div class="flex justify-end gap-2 text-[10px]">
+                  <button @click="editingMessageId = null" class="text-zinc-400 hover:text-white cursor-pointer">İptal</button>
+                  <button @click="saveEdit(msg.id)" class="text-green-400 font-bold hover:text-green-300 cursor-pointer">Kaydet</button>
+                </div>
+              </div>
+
+              <div v-else>
+                <p v-if="msg.deleted" class="flex items-center gap-1 text-xs text-zinc-500">
+                  🚫 Bu mesaj silindi
+                </p>
+                <p v-else class="whitespace-pre-wrap break-all">{{ msg.content }}</p>
+              </div>
+
+              <span v-if="msg.edited && !msg.deleted" class="text-[9px] text-zinc-400 block text-right mt-0.5">
+                (düzenlendi)
+              </span>
+            </div>
+          </div>
+
+          <img 
+            v-if="Number(msg.sender_id) === Number(user?.id || (user as any)?._id)"
+            :src="user?.avatar || '/chat_app.png'"
+            class="w-8 h-8 rounded-full object-cover border border-zinc-700 ml-1 shrink-0 mb-1"
+            alt="My avatar"
+          />
+
+        </div>
+
+        <div class="flex items-center gap-2 mt-1.5 flex-wrap" :class="Number(msg.sender_id) === Number(user?.id || (user as any)?._id) ? 'mr-10' : 'ml-10'">
+          
+          <button 
+            v-if="!msg.deleted"
+            @click="toggleEmojiMenu(msg.id)"
+            class="text-[10px] bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-400 px-1.5 py-0.5 rounded-full transition cursor-pointer"
+          >
+            ➕
+          </button>
+
+          <div v-if="msg.reactions && msg.reactions.length > 0" class="flex gap-1 flex-wrap">
+            <button 
+              v-for="(r, idx) in msg.reactions" 
+              :key="idx"
+              @click="toggleReaction(msg.id, r.emoji)"
+              class="text-[11px] bg-zinc-800 border border-zinc-700 rounded-full px-2 py-0.5 text-zinc-300 shadow-sm hover:bg-zinc-700 hover:scale-105 transition cursor-pointer"
+              :class="{'border-emerald-500/50 bg-emerald-950/20': Number(r.userId || (r as any).user_id) === Number(user?.id || (user as any)?._id)}"
+            >
+              {{ r.emoji }}
+            </button>
+          </div>
+
+          <span class="text-[10px] text-zinc-500">
+            {{ msg.created_at ? new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '' }}
+          </span>
+
+          <div v-if="Number(msg.sender_id) === Number(user?.id || (user as any)?._id) && !msg.deleted" class="text-[11px] flex items-center">
+            <span v-if="msg.read" class="text-emerald-400 font-bold tracking-tighter" title="Okundu">✓✓</span>
+            <span v-else-if="msg.delivered" class="text-zinc-500 font-bold" title="İletildi">✓</span>
+            <span v-else class="text-zinc-500 text-[10px] animate-pulse" title="Beklemede">🕒</span>
           </div>
         </div>
 
-        <!-- Kendi mesajın (SAĞ) -->
-        <div v-else class="flex gap-3 max-w-[75%] flex-row-reverse">
-          <div>
-            <div class="bg-gradient-to-br from-amber-400 to-yellow-400 px-5 py-3 rounded-3xl rounded-br-none text-zinc-900 text-[15px] shadow">
-              {{ m.content }}
-              <small v-if="m.edited" class="text-xs text-amber-800"> (edited)</small>
-            </div>
-            <p class="text-xs text-right text-zinc-500 mt-1 pr-2">
-              {{ new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }}
-            </p>
-          </div>
-        </div>
       </div>
     </div>
 
-    <!-- Input -->
-    <div class="p-4 border-t border-zinc-800 bg-zinc-900">
-      <div v-if="editingMessageId" class="flex gap-2 mb-3">
-        <input v-model="editText" class="flex-1 bg-zinc-800 border border-amber-400 rounded-3xl px-5 py-3" />
-        <button @click="saveEdit" class="px-6 bg-emerald-600 rounded-3xl">Save</button>
-        <button @click="cancelEdit" class="px-6 bg-red-600 rounded-3xl">Cancel</button>
-      </div>
-
-      <div v-else class="flex items-center gap-3">
-        <input
-          v-model="text"
-          @input="handleTyping"
-          @blur="() => stopTyping(selectedUser?.id)"
-          @keyup.enter="send"
-          placeholder="Mesaj yaz..."
-          class="flex-1 bg-zinc-800 border border-zinc-700 focus:border-amber-400 rounded-3xl px-6 py-4 text-white placeholder-zinc-500 outline-none"
+    <div v-if="selectedUser" class="p-4 bg-zinc-900 border-t border-zinc-700/70">
+      <form @submit.prevent="handleSend" class="flex items-center gap-2">
+        <input 
+          v-model="messageInput"
+          @keydown="handleKeyDown"
+          type="text" 
+          placeholder="Mesajınızı yazın..." 
+          class="flex-1 px-4 py-2.5 rounded-xl bg-zinc-800 text-sm text-zinc-200 border border-zinc-700 focus:outline-none focus:ring-2 focus:ring-[#777c5c]"
         />
         <button 
-          @click="send"
-          :disabled="!text.trim()"
-          class="w-12 h-12 bg-gradient-to-br from-amber-400 to-yellow-500 text-zinc-900 rounded-3xl text-3xl flex items-center justify-center disabled:opacity-50"
+          type="submit"
+          :disabled="!messageInput.trim()"
+          class="px-4 py-2.5 rounded-xl text-sm font-semibold bg-linear-to-r from-[#69694c] to-zinc-500 text-white cursor-pointer disabled:opacity-40"
         >
-          ↑
+          Gönder
         </button>
-      </div>
+      </form>
     </div>
-  </div>
 
-  
+  </div>
 </template>

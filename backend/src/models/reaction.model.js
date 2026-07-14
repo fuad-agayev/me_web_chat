@@ -3,9 +3,9 @@ import { pool } from '../config/db.js';
 export const addReaction = async (messageId, userId, emoji) => {
   const r = await pool.query(
     `
-       INSERT INTO reactions (message_id, user_id, emoji)
+       INSERT INTO message_reactions (message_id, user_id, emoji)
        VALUES ($1, $2, $3)
-       ON CONSFLICT DO NOTHING
+       ON CONFLICT DO NOTHING
        RETURNING *
     `,
     [messageId, userId, emoji]
