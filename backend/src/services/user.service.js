@@ -14,3 +14,7 @@ export const updateLastSeen = async (userId) => {
 export const updateAvatar = (userId, avatar) => {
    return UserModel.updateAvatarModel(userId, avatar);
 };
+
+export const updateLocationService = async (userId, latitude, longitude) => {
+  return await UserModel.updateLocationModel(userId, latitude, longitude);
+};

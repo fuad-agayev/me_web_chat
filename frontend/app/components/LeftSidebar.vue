@@ -1,115 +1,40 @@
-
-
 <template>
-  <div class="my-auto">
-    <!-- LEFT SIDEBAR -->
-    <aside class="w-16 h-[80vh] my-auto rounded-xl flex flex-col items-center justify-between py-4 
-                   bg-linear-to-t from-zinc-400 via-[#a7a374] to-zinc-500  shadow-lg shadow-zinc-700/70">
-      
-      <!-- Logo -->
-      <div class="w-12 h-12 flex items-center justify-center border-2 border-zinc-900 px-4 font-semibold 
-            shadow-lg shadow-zinc-700/70 rounded-md hover:scale-105 transition-transform">
-        <h4 class="font-bold text-zinc-700 tracking-wide">FA</h4>
-      </div>
-
-      <!-- Navigation -->
-      <nav class="space-y-6">
-        <!-- Home -->
-        <NuxtLink 
-  to="/" 
-  class="relative group w-14 h-14 rounded flex items-center justify-center transition-all shadow-md hover:bg-black/50"
->
-  <HomeIcon class="w-6 h-6 text-gray-900 group-hover:text-white" />
-  <span 
-    class="absolute left-full ml-2 top-1/2 -translate-y-1/2 
-           px-2 py-1 rounded bg-transparent text-zinc-100 text-md border border-zinc-500 
-           opacity-0 group-hover:opacity-100 transition-opacity w-auto"
+  <aside 
+    class="fixed bottom-0 left-0 w-full md:relative md:w-20 md:h-[80vh] md:my-auto md:rounded-2xl 
+           flex md:flex-col items-center justify-between py-3 md:py-6 px-2 md:px-0 z-50
+           bg-black/40 md:bg-zinc-900/40 border-t md:border md:border-white/40 
+           shadow-2xl transition-all duration-300"
   >
-    Home
-  </span>
-</NuxtLink>
+    <div class="hidden md:flex w-12 h-12 items-center justify-center border border-zinc-400 rounded-xl mb-4 hover:bg-[#e6e7a9]">
+      <h4 class="font-bold text-zinc-500 tracking-wide">FA</h4>
+    </div>
 
-<!-- Chat -->
-<NuxtLink 
-  to="/chat" 
-  class="relative group w-14 h-14 rounded flex items-center justify-center transition-all shadow-md hover:bg-black/50"
->
-  <ChatBubbleLeftRightIcon class="w-6 h-6 text-gray-900 group-hover:text-white" />
-  <span 
-    class="absolute left-full ml-2 top-1/2 -translate-y-1/2 
-           px-2 py-1 rounded bg-transparent text-zinc-100 text-md border border-zinc-500 
-           opacity-0 group-hover:opacity-100 transition-opacity w-auto"
-  >
-    Chat
-  </span>
-</NuxtLink>
+    <nav class="flex md:flex-col w-full md:w-auto justify-around md:justify-center md:space-y-6">
+      <NuxtLink to="/" class="group w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center transition-all hover:bg-[#e6e7a9]">
+        <HomeIcon class="w-5 h-5 text-white/70 group-hover:text-[#7d7e5c] transition-colors" />
+      </NuxtLink>
 
-<!-- Login -->
-<NuxtLink 
-  to="/login" 
-  class="relative group w-14 h-14 rounded flex items-center justify-center transition-all shadow-md hover:bg-black/50"
->
-  <UserIcon class="w-6 h-6 text-gray-900 group-hover:text-white" />
-  <span 
-    class="absolute left-full ml-2 top-1/2 -translate-y-1/2 
-           px-2 py-1 rounded bg-transparent text-zinc-100 text-md border border-zinc-500 
-           opacity-0 group-hover:opacity-100 transition-opacity w-auto"
-  >
-    Login
-  </span>
-</NuxtLink>
+      <NuxtLink to="/chat" class="group w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center transition-all hover:bg-[#e6e7a9]">
+        <ChatBubbleLeftRightIcon class="w-5 h-5 text-white/70 group-hover:text-[#8c8d63] transition-colors" />
+      </NuxtLink>
 
-<!-- Contact -->
-<NuxtLink 
-  to="/contact" 
-  class="relative group w-14 h-14 rounded flex items-center justify-center transition-all shadow-md hover:bg-black/50"
->
-  <IdentificationIcon class="w-6 h-6 text-gray-900 group-hover:text-white" />
-  <span 
-    class="absolute left-full ml-2 top-1/2 -translate-y-1/2 
-           px-2 py-1 rounded bg-transparent text-zinc-100 text-md border border-zinc-500 
-           opacity-0 group-hover:opacity-100 transition-opacity w-auto"
-  >
-    Contact
-  </span>
-</NuxtLink>
-      </nav>
+      <NuxtLink to="/login" class="group w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center transition-all hover:bg-[#e6e7a9]">
+        <UserIcon class="w-5 h-5 text-white/70 group-hover:text-[#92926e] transition-colors" />
+      </NuxtLink>
 
-      <!-- Bottom Section -->
-<div class="flex flex-col items-center space-y-4">
-  <!-- Avatar -->
-  
-  <!-- Settings -->
+      <NuxtLink to="/contact" class="group w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center transition-all hover:bg-[#e6e7a9]">
+        <IdentificationIcon class="w-5 h-5 text-white/70 group-hover:text-[#8b8b5a] transition-colors" />
+      </NuxtLink>
+    </nav>
 
-  
-       <NuxtLink 
-    to="/settings" 
-    class="relative group w-14 h-14 rounded border-2 border-zinc-800 shadow-zinc-700/70 flex items-center justify-center transition-all shadow-md hover:bg-black/50"
-  >
-    <Cog6ToothIcon class="w-6 h-6 text-gray-900 group-hover:text-white hover:rotate-90 transition-transform" />
-    <span 
-      class="absolute left-full ml-2 top-1/2 -translate-y-1/2 
-             px-2 py-1 rounded bg-transparent text-zinc-50 text-sm border border-zinc-500 
-             opacity-0 group-hover:opacity-100 transition-opacity w-auto"
-    >
-      Settings
-    </span>
-  </NuxtLink>
-      
-  
-</div>
-
-
-    </aside>
-  </div>
+    <div class="hidden md:flex flex-col items-center">
+      <NuxtLink to="/settings" class="w-12 h-12 rounded-xl border border-white/5 flex items-center justify-center transition-all hover:bg-[#e6e7a9]">
+        <Cog6ToothIcon class="w-5 h-5 text-white/50 hover:text-[#bec064] hover:rotate-90 transition-all" />
+      </NuxtLink>
+    </div>
+  </aside>
 </template>
 
 <script setup lang="ts">
 import { HomeIcon, UserIcon, ChatBubbleLeftRightIcon, IdentificationIcon, Cog6ToothIcon } from "@heroicons/vue/24/outline";
 </script>
-
-
-
-
-
-

@@ -1,5 +1,5 @@
 import { env } from "../config/env.js";
-import { getUsers, updateAvatar } from "../services/user.service.js";
+import { getUsers, updateAvatar, updateLocationService } from "../services/user.service.js";
 import cloudinary from '../config/cloudinary.js';
 
 
@@ -38,5 +38,70 @@ export const uploadAvatar = async (req, res) => {
 };
 
 
+// export const updateLocation = async (req, res) => {
+//      try {
+//          const { latitude, longitude } = req.body;
+//          const result = await updateLocationService(req.user.id, latitude, longitude);
+//          res.json(result);
+//   } catch (err) {
+//          res.status(500).json({ message: err.message });
+//   }
+// };
+
+// export const updateLocation = async (req, res) => {
+//     try {
+
+//         console.log("BODY:", req.body);
+//         console.log("USER:", req.user);
+
+//         const { latitude, longitude } = req.body;
+
+//         const result = await updateLocationService(
+//             req.user.id,
+//             latitude,
+//             longitude
+//         );
+
+//         console.log(result);
+
+//         res.json(result);
+
+//     } catch (err) {
+
+//         console.error(err);
+
+//         res.status(500).json({
+//             message: err.message
+//         });
+//     }
+// };
 
 
+export const updateLocation = async (req, res) => {
+  console.log("===== UPDATE LOCATION =====");
+
+  try {
+    console.log("BODY:", req.body);
+    console.log("USER:", req.user);
+  
+    const { latitude, longitude } = req.body;
+
+    const result = await updateLocationService(
+      req.user.id,
+      latitude,
+      longitude
+    );
+
+    console.log("DB RESULT:", result);
+
+    return res.status(200).json(result);
+
+  } catch (err) {
+    console.error("UPDATE LOCATION ERROR:");
+    console.error(err);
+
+    return res.status(500).json({
+      message: err.message
+    });
+  }
+};

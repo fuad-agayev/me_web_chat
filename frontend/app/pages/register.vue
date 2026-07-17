@@ -52,9 +52,26 @@
     class="px-4 py-2 rounded-lg bg-zinc-200 text-zinc-700 text-xs font-medium hover:bg-zinc-300 transition"
   >
       <span v-if="waitingLocation" class="animate-spin w-3 h-3 border-2 border-gray-500 border-t-transparent rounded-full"></span>
-    📍 Get Location then Create Account <span class="text-[10px] text-zinc-500">(optional)</span>
+    📍 Would you like to share your location then Create Account <span class="text-[10px] text-zinc-500">(optional)</span>
   </button>
+<div class="flex items-center my-6">
+  <div class="flex-1 h-px bg-zinc-500"></div>
+  <span class="px-3 text-xs text-zinc-400">OR</span>
+  <div class="flex-1 h-px bg-zinc-500"></div>
+</div>
 
+<button
+  type="button"
+  @click="loginWithGoogle"
+  class="w-full flex items-center justify-center gap-3 from-[#333516] to-[#d6d5a6] shadow-lg text-zinc-400 font-medium py-3 rounded-xl cursor-pointer transition"
+>
+  <img
+    src="https://www.svgrepo.com/show/475656/google-color.svg"
+    class="w-5 h-5"
+    alt="Google"
+  />
+  Continue with Google
+</button>
   <!-- Sign In link -->
   <p class="mt-2 text-[14px] text-zinc-400 hover:text-zinc-500 transition-colors font-semibold tracking-wide text-center cursor-pointer">
     Already have an account..? 
@@ -75,14 +92,11 @@
   </div>
 </template>
 
-
-
-
 <script setup lang="ts">
 import { useAuth } from "~/composables/useAuth";
 import { ref, reactive } from "vue";
 
-const { register } = useAuth()
+const { register, loginWithGoogle } = useAuth()
 
 const toastMessage = ref("")
 const toastType = ref<"success" | "error" | "">("")

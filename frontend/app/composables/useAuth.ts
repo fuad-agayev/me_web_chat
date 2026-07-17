@@ -73,6 +73,14 @@ await fetchProfile(); // profil məlumatını yenilə
 // --------------  Login--------------//
 
 
+// --------------  with google --------------//
+const loginWithGoogle = () => {
+  window.location.href = `${config.public.apiBase}/auth/google`;
+};
+// -------------- with  google  --------------//
+
+
+
 //* -----------------------------  Logout ------------------------------//
 const logout = async () => {
     await $fetch(`${config.public.apiBase}/api/auth/logout`, {
@@ -87,5 +95,23 @@ const logout = async () => {
 //* -----------------------------  Logout ------------------------------//
 
 
-  return { user, register, login, logout, fetchProfile };
+//* -----------------------------  get Location ------------------------------//
+
+const updateLocation = async (
+  latitude: number,
+  longitude: number
+) => {
+  return await $fetch(`${config.public.apiBase}/api/users/location`, {
+    method: "PATCH",
+    credentials: "include",
+    body: {
+      latitude,
+      longitude
+    }
+  });
+};
+//* -----------------------------  get Location ------------------------------//
+
+
+  return { user, register, login, logout, fetchProfile, loginWithGoogle, updateLocation };
 };

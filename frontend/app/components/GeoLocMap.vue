@@ -2,7 +2,7 @@
 <template>
   <div
     id="map"
-    class="w-full max-h-105 h-screen rounded-lg shadow-lg border border-white/20 bg-zinc-800 overflow-hidden mt-6"
+    class="w-full max-h-90 h-screen rounded-lg shadow-lg border border-white/20 bg-zinc-800 overflow-hidden mt-6"
   ></div>
 </template>
 

@@ -322,7 +322,7 @@ const toggleEmojiMenu = (msgId: number) => {
           :disabled="!messageInput.trim()"
           class="px-4 py-2.5 rounded-xl text-sm font-semibold bg-linear-to-r from-[#69694c] to-zinc-500 text-white cursor-pointer disabled:opacity-40"
         >
-          Gönder
+          Send
         </button>
       </form>
     </div>

@@ -47,6 +47,23 @@ export const UserModel = {
   },
 
 
+  updateLocationModel: async (userId, latitude, longitude) => {
+  const r = await pool.query(
+    `
+    UPDATE users
+    SET
+      latitude = $1,
+      longitude = $2
+    WHERE id = $3
+    RETURNING latitude, longitude
+    `,
+    [latitude, longitude, userId]
+  );
+
+  return r.rows[0];
+},
+
+
   //? 👤 ID ilə user tapmaq (profile / socket / UI üçün faydalı) Ben Email ile yapdim bunu yerine findByEmail:   ile
  
 findById: async (userId) => {

@@ -1,6 +1,9 @@
 import dotenv from "dotenv";
 dotenv.config(); // 🔥 SADECE BURADA
 
+
+
+
 export const env = {
   PORT: process.env.PORT,
   SERVER_URL: process.env.SERVER_URL,

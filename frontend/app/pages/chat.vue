@@ -11,13 +11,60 @@ import { useChat } from "~/composables/useChat";
 import { useAuth } from "~/composables/useAuth";
 import { useGlobalChat } from "~/composables/useGlobalChat";
 
-const { user, logout, fetchProfile } = useAuth();
+const { user, logout, fetchProfile,  updateLocation } = useAuth();
 const { globalOnlineUsers, fetchGlobalOnlineUsers } = useGlobalChat();
 
+
+const showLocationPopup = ref(false);
+
+// onMounted(async () => {
+//   await fetchProfile();
+//   await fetchGlobalOnlineUsers();
+// });
+
+
 onMounted(async () => {
-  await fetchProfile();
-  await fetchGlobalOnlineUsers();
+    await fetchProfile();
+    if (user.value && (user.value.latitude == null || user.value.longitude == null)) {
+        showLocationPopup.value = true;
+    }
+    await fetchGlobalOnlineUsers();
 });
+
+
+
+const allowLocation = () => {
+
+    // Popup hemen kapansın
+    showLocationPopup.value = false;
+
+    navigator.geolocation.getCurrentPosition(
+        async (pos) => {
+
+            try {
+                await updateLocation(
+                    pos.coords.latitude,
+                    pos.coords.longitude
+                );
+
+                user.value!.latitude = pos.coords.latitude;
+                user.value!.longitude = pos.coords.longitude;
+
+            } catch (err) {
+                console.error(err);
+            }
+
+        },
+        (err) => {
+            console.error(err);
+        },
+        {
+            enableHighAccuracy: true,
+            timeout: 5000,
+            maximumAge: 0
+        }
+    );
+};
 
 const { isUserTyping } = useChat();
 
@@ -43,14 +90,18 @@ const mode = ref<"private" | "global">("private");
 const selectUser = ref<any>(null);
 </script>
 
-<template>
-  <div class="flex h-screen text-white bg-zinc-800 overflow-hidden">
-    <LeftSidebar />
 
-    <div class="flex-1 flex h-[80vh] my-auto mx-8 shadow-2xl shadow-[#9ca177] rounded-xl overflow-hidden">
+<template>
+  <div class="flex flex-col md:flex-row h-auto md:h-screen text-white bg-zinc-800 overflow-hidden">
+    <!-- Left Sidebar -->
+    <LeftSidebar class="w-full md:w-64 lg:w-72" />
+
+    <!-- Middle Section -->
+    <div class="flex-1 flex flex-col md:flex-row h-auto md:h-[80vh] my-4 md:my-auto mx-2 md:mx-8 shadow-2xl shadow-[#9ca177] rounded-xl overflow-hidden">
       
       <!-- Sidebar -->
-      <aside class="w-90 flex flex-col overflow-hidden mx-4 rounded-xl shadow-2xl shadow-black/70 bg-zinc-800">
+      <aside class="w-full md:w-72 flex flex-col overflow-hidden mx-0 md:mx-4 rounded-xl shadow-2xl shadow-black/70 bg-zinc-800">
+        <!-- User Info + Search -->
         <div class="flex flex-col gap-4 p-4 shadow-md bg-zinc-900">
           <!-- User Info -->
           <div v-if="user" class="flex items-center gap-3 p-2 shadow-inner">
@@ -87,12 +138,14 @@ const selectUser = ref<any>(null);
 
         <!-- Tabs -->
         <div class="flex shadow-md text-sm font-semibold py-4 px-2 gap-2">
+          <!-- Private -->
           <button @click="mode='private'" 
             :class="mode==='private' ? 'flex-1 py-2 bg-linear-to-r from-[#69694c] to-zinc-400 text-white shadow-lg rounded' : 'flex-1 py-2 bg-zinc-700 text-zinc-100 rounded hover:bg-zinc-600'" 
             class="flex items-center justify-center space-x-2 transition-all">
             <LockClosedIcon class="w-5 h-5" />
             <span>Private</span>
           </button>
+          <!-- Global -->
           <button @click="mode='global'" 
             :class="mode==='global' ? 'flex-1 py-2 bg-linear-to-r from-[#69694c] to-zinc-400 text-white shadow-lg rounded' : 'flex-1 py-2 bg-zinc-700 text-zinc-100 rounded hover:bg-zinc-600'" 
             class="flex items-center justify-center space-x-2 transition-all">
@@ -109,14 +162,32 @@ const selectUser = ref<any>(null);
 
       <!-- Chat Area -->
       <main class="flex-1 flex flex-col shadow-2xl shadow-[#9ca177] rounded-xl bg-zinc-800">
-        <div class="flex-1 overflow-y-auto p-6">
+        <div class="flex-1 overflow-y-auto p-4 md:p-6">
           <PrivateChat v-if="mode==='private'" :selectedUser="selectUser"/>
           <GlobalChat v-else />
         </div>
       </main>
 
+
+                <!-- Pop up lat log -->
+                 <div
+v-if="showLocationPopup"
+class="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+
+<div class="bg-zinc-800 rounded-xl p-8 w-25rem">
+       <h2 class="text-xl font-bold"> Share your location? </h2>
+       <p class="mt-4 text-zinc-300"> This helps nearby users find you.</p>
+<div class="flex justify-end gap-4 mt-8">
+<button @click="showLocationPopup=false">Skip </button>
+<button @click="allowLocation"> Allow </button>
+</div>
+</div>
+</div>
+               <!--  -->
+
+
       <!-- Right Sidebar -->
-      <aside class="w-96 p-4 shadow-2xl shadow-[#ccd39b] rounded-xl bg-zinc-800 ml-4">
+      <aside class="w-full md:w-96 p-4 shadow-2xl shadow-[#ccd39b] rounded-xl bg-zinc-800 mt-4 md:mt-0 md:ml-4">
         <UserProfiles v-if="mode==='private'" :selectedUser="selectUser" />
 
         <div v-if="mode==='global'" class="text-zinc-300 p-6 rounded-2xl flex flex-col h-full">
