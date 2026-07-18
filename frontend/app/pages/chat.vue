@@ -6,7 +6,8 @@ import UserList from "~/components/UserList.vue";
 import PrivateChat from "~/components/PrivateChat.vue";
 import GlobalChat from "~/components/GlobalChat.vue";
 import UserProfiles from "~/components/UserProfiles.vue";
-import { LockClosedIcon, GlobeAltIcon, ArrowLeftOnRectangleIcon } from "@heroicons/vue/24/outline";
+import ChangePassword from "~/components/ChangePassword.vue"
+import { LockClosedIcon, GlobeAltIcon, ArrowLeftOnRectangleIcon} from "@heroicons/vue/24/outline";
 import { useChat } from "~/composables/useChat";
 import { useAuth } from "~/composables/useAuth";
 import { useGlobalChat } from "~/composables/useGlobalChat";
@@ -16,6 +17,11 @@ const { globalOnlineUsers, fetchGlobalOnlineUsers } = useGlobalChat();
 
 
 const showLocationPopup = ref(false);
+const showChangePassword = ref(false);
+
+const toast = ref("");
+const showToast = ref(false);
+
 
 // onMounted(async () => {
 //   await fetchProfile();
@@ -34,7 +40,6 @@ onMounted(async () => {
 
 
 const allowLocation = () => {
-
     // Popup hemen kapansın
     showLocationPopup.value = false;
 
@@ -50,6 +55,7 @@ const allowLocation = () => {
                 user.value!.latitude = pos.coords.latitude;
                 user.value!.longitude = pos.coords.longitude;
 
+                showSuccessToast("✅ Location updated successfully.");
             } catch (err) {
                 console.error(err);
             }
@@ -85,9 +91,19 @@ const handleFile = async (e: any) => {
   await fetchProfile();
 };
 
+const showSuccessToast = (message: string) => {
+  toast.value = message;
+  showToast.value = true;
+
+  setTimeout(() => {
+    showToast.value = false;
+  }, 3000);
+};
+
 definePageMeta({ middleware: "auth" });
 const mode = ref<"private" | "global">("private");
 const selectUser = ref<any>(null);
+
 </script>
 
 
@@ -122,12 +138,23 @@ const selectUser = ref<any>(null);
             <div class="flex-1">
               <h3 class="text-base font-semibold text-zinc-400 truncate">{{ user?.username }}</h3>
               <p class="text-xs text-zinc-300 truncate">{{ user?.email }}</p>
+              <button @click="showChangePassword = true" class="text-xs text-zinc-400 hover:text-[#cecf75] ">
+                    <span class="flex items-center gap-1 font-bold">
+                       <LockClosedIcon class="w-4 h-4" />
+                     Change Password
+                    </span>
+            </button>
             </div>
+
             <button @click="logout" class="flex items-center gap-1 px-2 py-1 rounded transition">
               <ArrowLeftOnRectangleIcon class="w-6 h-6 hover:scale-105 transition-transform" />
             </button>
-          </div>
 
+            
+            <!-- Modal component ayrı render edilir -->
+           <ChangePassword v-if="showChangePassword" @close="showChangePassword = false" />
+
+          </div>
           <!-- Search -->
           <input 
             type="text" 
@@ -169,7 +196,7 @@ const selectUser = ref<any>(null);
       </main>
 
 
-                <!-- Pop up lat log -->
+                <!-- Pop up lat long -->
                  <div
 v-if="showLocationPopup"
 class="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
@@ -183,8 +210,26 @@ class="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
 </div>
 </div>
 </div>
-               <!--  -->
 
+               <!--  PopUP  lat- long      -->
+
+               <!--     Toast Location    -->
+                    <Transition
+  enter-active-class="transition duration-300"
+  leave-active-class="transition duration-300"
+  enter-from-class="opacity-0 translate-y-4"
+  enter-to-class="opacity-100 translate-y-0"
+  leave-from-class="opacity-100 translate-y-0"
+  leave-to-class="opacity-0 translate-y-4"
+>
+  <div
+    v-if="showToast"
+    class="fixed bottom-6 right-6 bg-linear-to-r from-zinc-400 to-[#bebb87] text-zinc-700 px-5 py-3 rounded-xl shadow-2xl z-50"
+  >
+    {{ toast }}
+  </div>
+</Transition>
+               <!--     Toast Location    -->
 
       <!-- Right Sidebar -->
       <aside class="w-full md:w-96 p-4 shadow-2xl shadow-[#ccd39b] rounded-xl bg-zinc-800 mt-4 md:mt-0 md:ml-4">

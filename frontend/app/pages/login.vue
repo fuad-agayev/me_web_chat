@@ -110,6 +110,7 @@ const handleDemoLogin = async () => {
   Continue with Google
 </button>
           <!-- Sign Up Link -->
+           
           <div class="pt-4 text-center">
             <a href="/register" class="text-[14px] text-zinc-700/70 hover:text-zinc-400 transition-colors font-semibold tracking-wide">
               Don't have an account? Sign Up

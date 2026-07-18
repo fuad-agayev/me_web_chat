@@ -64,6 +64,26 @@ export const UserModel = {
 },
 
 
+updatePassword: async (userId, password) => {
+   await pool.query(
+    `
+    UPDATE users SET password=$1 WHERE id=$2
+    `,
+    [password, userId]
+   );
+},
+
+findPasswordById: async (userId) => {
+   const r = await pool.query(
+    `
+    SELECT password FROM users WHERE id=$1
+    `,
+    [userId]
+   )
+   return r.rows[0];
+},
+
+
   //? 👤 ID ilə user tapmaq (profile / socket / UI üçün faydalı) Ben Email ile yapdim bunu yerine findByEmail:   ile
  
 findById: async (userId) => {

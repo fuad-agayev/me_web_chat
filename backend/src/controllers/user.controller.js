@@ -1,5 +1,5 @@
 import { env } from "../config/env.js";
-import { getUsers, updateAvatar, updateLocationService } from "../services/user.service.js";
+import { getUsers, updateAvatar, updateLocationService, changePasswordService } from "../services/user.service.js";
 import cloudinary from '../config/cloudinary.js';
 
 
@@ -105,3 +105,14 @@ export const updateLocation = async (req, res) => {
     });
   }
 };
+
+
+export const changePassword = async (req, res) => {
+   try {
+        const { oldPassword, newPassword } = req.body;
+              await changePasswordService(req.user.id, oldPassword, newPassword);
+              res.json({message: "Password update succcesfully" });
+   } catch(err) {
+        res.status(400).json({ message: err.message });
+   }
+}

@@ -1,5 +1,6 @@
 import { pool } from '../config/db.js';
 import { UserModel } from '../models/user.model.js';
+import bcrypt from "bcrypt";
 
 export const getUsers = async () => {
   const r = await pool.query('SELECT id, username, email, avatar, latitude, longitude FROM users');
@@ -18,3 +19,18 @@ export const updateAvatar = (userId, avatar) => {
 export const updateLocationService = async (userId, latitude, longitude) => {
   return await UserModel.updateLocationModel(userId, latitude, longitude);
 };
+
+export const changePasswordService = async (userId, oldPassword, newPassword) => {
+   const user = await UserModel.findPasswordById(userId);
+
+   const ok = await bcrypt.compare(oldPassword, user.password);
+   if(!ok) throw new Error("Wrong password");
+
+   const hashed = await bcrypt.hash(newPassword, 10);
+                  await UserModel.updatePassword(userId, hashed)
+};
+
+
+
+
+
