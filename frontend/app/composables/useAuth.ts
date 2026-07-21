@@ -75,7 +75,7 @@ await fetchProfile(); // profil məlumatını yenilə
 
 // --------------  with google --------------//
 const loginWithGoogle = () => {
-  window.location.href = `${config.public.apiBase}/auth/google`;
+  window.location.href = `${config.public.apiBase}/api/auth/google`;
 };
 // -------------- with  google  --------------//
 

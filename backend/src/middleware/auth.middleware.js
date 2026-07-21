@@ -8,6 +8,7 @@ export const auth = (req, res, next) => {
            return res.status(401).json({error: "Unauthorized"})
        }
         try{
+            //ACCESs token-i alir ve decode eder  ve kullanci isteyiden kullanici acces toekni ile berbaerlesdiri 
             const decoded = verifyAccessToken(token);
             req.user = decoded;
             next();

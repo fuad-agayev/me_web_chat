@@ -316,3 +316,49 @@ socket.on("disconnect", async () => {
 });
 
 }
+
+//?  BU islemler  ILAVE ederdik refresh Bitdike chat sohbet bitmiyor kulalnicilar shbet edebilir ancak baska safyafa gecit yapincay kadar 
+//?  v ebundna sonr a  artik lOGIN sayfasi gosterir sayfaya gitdikde artik chat baglanir cja=hat qalirlarsa devan eder duumu our NORMALdir 
+// ?  guvenlik acisi deyildir
+//?   V e  bu silmei hangi refresh bitdikde chat bitsin gibi yamak istedidke vey gureki kontrol ederke toekn verilmeis ilede yapabiliriz  kodlarini asagifdakilat 
+//? ilave edebiliriz ANcak gerek yokUNUTMAAAAAAAAAAAAAA bu mantiki!!!!!!
+// io.use((socket, next) => {
+//   const cookies = cookie.parse(socket.handshake.headers.cookie || "");
+//   const token = cookies.access_token;
+
+//   if (!token) return next(new Error("Unauthorized"));
+
+//   socket.user = verifyAccessToken(token);
+//   next();
+// });
+//* Bu kısım doğru. Ama sadece ilk bağlantıda çalışıyor.
+
+// 🔹 2. Her mesajda veya belirli aralıklarla token kontrolü
+// Burada ek yapman lazım. Örneğin sendMessage event’inde:
+
+// js
+// socket.on("sendMessage", async ({ receiver_id, content }) => {
+//   try {
+//     // Tokeni her mesajda kontrol et
+//     verifyAccessToken(cookie.parse(socket.handshake.headers.cookie || "").access_token);
+
+//     const msg = await sendMessageService(userId, receiver_id, content);
+//     io.to(`user_${userId}`).emit("messageSent", msg);
+//     io.to(`user_${receiver_id}`).emit("newMessage", msg);
+//   } catch (err) {
+//     socket.emit("error", "Token expired, please login again");
+//     socket.disconnect(); // Token geçersizse bağlantıyı kes
+//   }
+// });
+// 🔹 3. Alternatif: Periyodik kontrol
+//* Her mesajda kontrol yapmak yerine, belirli aralıklarla (örneğin her 1 dakikada bir) token doğrulaması yapabilirsin:
+
+// js
+// setInterval(() => {
+//   try {
+//     verifyAccessToken(cookie.parse(socket.handshake.headers.cookie || "").access_token);
+//   } catch (err) {
+//     socket.emit("error", "Session expired");
+//     socket.disconnect();
+//   }
+// }, 60000); // her 60 saniyede bir kontrol

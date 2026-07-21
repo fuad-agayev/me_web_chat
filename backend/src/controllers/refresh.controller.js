@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 import { env } from "../config/env.js";
-import { signAccessToken } from "../utils/jwt.js";
+import { signAccessToken, verifyRefreshToken } from "../utils/jwt.js";
 
 export const refresh = (req, res) => {
   try {
@@ -12,7 +12,13 @@ export const refresh = (req, res) => {
     }
 
     // 🔥 refresh token doğrula
-    const decoded = jwt.verify(refreshToken, env.REFRESH_SECRET);
+    //const decoded = jwt.verify(refreshToken, env.REFRESH_SECRET);
+// ✅ refresh token doğrula
+//?   -----Yetki kontrolü her zaman access token üzerinden yapılır, refresh token sadece yeni access token üretmek için vardır.
+//?  -----Yetki kontrolu her zman ACCCESTOKEN ile yapilir --->  VerifyaccesToekn midlleware  o yuzden o varda orda  
+//?  ----VE bu verifyRefresshToken middleware de o yuzden kullanilmiyor verifyAccesToken gibi ords  MANTIINI ANLADINMI UNUTMAAAAAAAAA
+//? ----- Yani refresh token doğrudan yetki kontrolü için kullanılmaz, sadece yeni access token üretir.
+    const decoded = verifyRefreshToken(refreshToken);
 
     // 🔥 yeni access token üret
     const newAccessToken = signAccessToken({

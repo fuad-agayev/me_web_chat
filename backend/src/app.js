@@ -5,17 +5,25 @@ import cookieParser from 'cookie-parser';
 import { env } from './config/env.js';
 import path from 'path';
 
+import passport from "passport";
+import "./config/passport.js";
+
 const app = express();
 
 app.use(cors({origin: env.CLIENT_URL, credentials: true}));
 app.use(express.json());
 app.use(cookieParser());
+
+// Passport
+app.use(passport.initialize());
+
 //app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 
 if (env.NODE_ENV === "development") {
  app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
  console.log("Uploads path:", path.join(process.cwd(), "uploads"));
 }
+
 
 import authRoutes from './routes/auth.routes.js';
 import userRoutes from './routes/user.routes.js';

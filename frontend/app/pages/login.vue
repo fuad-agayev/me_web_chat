@@ -3,6 +3,7 @@
 import { reactive, ref } from "vue"
 import { useAuth } from "~/composables/useAuth";
 import { loginDemo } from "~/composables/demoApi";
+import ForgotPassword from "~/components/ForgotPassword.vue";
 import { ChevronLeftIcon } from "@heroicons/vue/24/outline";
 const { login, loginWithGoogle } = useAuth()
 
@@ -13,6 +14,7 @@ const form = reactive({
 
 const loading = ref(false);
 const error = ref("");
+const showForgot = ref(false)
 
 const submit = async () => {
   try {
@@ -70,12 +72,14 @@ const handleDemoLogin = async () => {
           
           <input v-model="form.password" type="password" placeholder="Password"
             class="w-full px-5 py-3.5 rounded-xl bg-linear-to-r from-zinc-400 to-white/70 text-sm text-gray-600 focus:outline-none border focus:border-zinc-700"/>
-
+           
+            <!--    FORGOT PASSWORD  -->
           <div class="text-right pr-1">
-            <a href="#" class="text-[11px] text-zinc-600 hover:text-yellow-700 transition-colors font-medium">
-              Forgot password?
-            </a>
+             <button class="text-[11px] text-zinc-200  hover:text-[#6fe4ad] transition-colors font-medium cursor-pointer"
+                     @click="showForgot = !showForgot">Forgot password..?</button>
+            <ForgotPassword :showForgot="showForgot" @close="showForgot = false" />
           </div>
+           <!--    FORGOT PASSWORD  -->
 
           <!-- Login + Demo Buttons -->
           <div class="pt-4 flex justify-center gap-4">

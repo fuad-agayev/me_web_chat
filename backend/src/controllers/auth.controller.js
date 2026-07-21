@@ -1,4 +1,4 @@
-import { registerUser, loginUser } from '../services/auth.service.js';
+import { registerUser, loginUser, forgotPasswordService, resetPasswordService } from '../services/auth.service.js';
 import { transporter } from '../config/mail.js';
 import { pool } from '../config/db.js';
 import { UserModel } from '../models/user.model.js';
@@ -121,5 +121,40 @@ export const current_user = async (req, res) => {
 // *--------------  Logout--------------//
 
 
+
+
+export const forgotPasswordController = async (req, res) => {
+  try {
+    const { email } = req.body;
+    const result = await forgotPasswordService(email);
+    res.json(result);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+};
+
+export const resetPasswordController = async (req, res) => {
+  try {
+    const { token, newPassword } = req.body;
+    const result = await resetPasswordService(token, newPassword);
+    res.json(result);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+};
+
+
+export const googleCallback = (req, res) => {
+  try {
+    const { user, jwtAccess, jwtRefresh } = req.user;
+
+    res.cookie("access_token", jwtAccess, { httpOnly: true, sameSite: "lax", secure: false });
+    res.cookie("refresh_token", jwtRefresh, { httpOnly: true, sameSite: "lax", secure: false });
+
+    res.redirect("http://localhost:3000/chat");
+  } catch (err) {
+    res.status(400).json({ error: "Google login failed" });
+  }
+};
 
 

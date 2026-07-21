@@ -9,5 +9,4 @@ router.get('/', auth, users);
 router.post("/avatar", auth, upload.single("avatar"), uploadAvatar);
 router.patch("/location", auth, updateLocation);
 router.patch("/changepassword", auth, changePassword);
-
 export default router;

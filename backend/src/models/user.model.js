@@ -105,6 +105,54 @@ findById: async (userId) => {
   );
 
   return r.rows[0];
+},
+
+saveResetToken: async (userId, token) => {
+       await pool.query(
+        `
+             UPDATE users SET reset_token=$1, reset_token_expiry=NOW() + interval '1 hour' WHERE id=$2
+        `,
+        [token, userId]
+       );
+},
+
+findByResetToken: async (token) => {
+     const r = await pool.query(
+      `
+      SELECT * FROM users WHERE reset_token=$1 AND reset_token_expiry > NOW()
+      `,
+      [token]
+     );
+     return r.rows[0];
+},
+
+clearResetToken: async (userId) => {
+  await pool.query(
+    `
+    UPDATE users SET reset_token=NULL, reset_token_expiry=NULL WHERE id=$1
+    `,
+    [userId]
+  )
+},
+
+findByGoogleId: async (googleId) => {
+   const r = await pool.query(
+    `
+    SELECT * FROM users WHERE google_id=$1
+    `,
+    [googleId]
+   )
+   return r.rows[0];
+},
+
+createGoogleUser: async ({username, email, google_id, avatar}) => {
+   const r = await pool.query(
+    `
+    INSERT INTO users (username, email, google_id, is_verified, avatar) VALUES ($1,$2,$3,true,$4) RETURNING *
+    `,
+    [username, email, google_id, avatar]
+   )
+   return r.rows[0];
 }
 
 }
