@@ -17,6 +17,7 @@ interface Message {
   sender_id: number;
   receiver_id: number;
   content: string;
+  avatar?: string
   reactions?: Reaction[];
   delivered?: boolean;
   read?: boolean;
@@ -193,6 +194,13 @@ socket.on("userOnline", ({ userId }) => {
       if (!messages.value.some((m) => m.id === msg.id)) {
         messages.value.push(msg);
       }
+
+      if (Notification.permission === "granted") {
+    new Notification("You Have message..!", {
+      body: msg.content,
+      icon: "/chat_app.png"
+    });
+  }
     });
 
     socket.on("messageRead", ({ messageId }) => {

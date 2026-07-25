@@ -19,6 +19,7 @@ interface User {
   avatar?: string;
   latitude?: number | null;
   longitude?: number | null;
+  google_id?: string;
 }
 
 
@@ -36,11 +37,34 @@ interface User {
 
 
 // -------------- Profile --------------//
+// const fetchProfile = async () => {
+//     const res = await request<User>("/api/auth/profile");
+//      console.log("PROFILE RESPONSE:", res);
+//     user.value = res;
+//   };
+
+  // -------------- Profile --------------//
 const fetchProfile = async () => {
-    const res = await request<User>("/api/auth/profile");
-     console.log("PROFILE RESPONSE:", res);
+  try {
+    const res = await request<User>("/api/auth/profile", {
+      // ekstra header görmek için
+      headers: { "Accept": "application/json" },
+       credentials: "include"
+    });
+
+    console.log("✅ PROFILE RESPONSE:", res);
     user.value = res;
-  };
+    return res;
+  } catch (err: any) {
+    console.error("❌ PROFILE ERROR:", err);
+    // hata kodunu da logla
+    if (err?.status) {
+      console.error("Status code:", err.status);
+    }
+    throw err;
+  }
+};
+
 
 
 //   const fetchProfile = async () => {
@@ -74,9 +98,12 @@ await fetchProfile(); // profil məlumatını yenilə
 
 
 // --------------  with google --------------//
+
 const loginWithGoogle = () => {
   window.location.href = `${config.public.apiBase}/api/auth/google`;
 };
+
+
 // -------------- with  google  --------------//
 
 

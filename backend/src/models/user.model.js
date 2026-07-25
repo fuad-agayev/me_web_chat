@@ -96,6 +96,7 @@ findById: async (userId) => {
       avatar,
       last_seen,
       created_at, 
+      google_id,
       latitude,
       longitude
     FROM users

@@ -5,6 +5,7 @@ export const useApi = () => {
     url: string,
     options: Parameters<typeof $fetch>[1] = {}
   ): Promise<T> => {
+    console.log("➡️ Request:", url);
     try {
       return await $fetch<T>(`${config.public.apiBase}${url}`, {
         credentials: "include",
@@ -28,8 +29,6 @@ export const useApi = () => {
           });
 
         } catch {
-          // ❌ refresh de fail → loop yok
-          await navigateTo("/login");
           throw new Error("Refresh failed");
         }
       }

@@ -32,7 +32,7 @@ const formatLastSeen = (date?: string | null) => {
     
     <div class="flex flex-col sm:flex-row items-center gap-4 border border-zinc-500 rounded-xl p-4">
       <img
-        :src="selectedUser.avatar || '/default-avatar.png'"
+        :src="selectedUser.avatar || '/chat_app.png'"
         alt="avatar"
         class="w-20 h-20 rounded-xl border border-zinc-500 object-cover"
       />

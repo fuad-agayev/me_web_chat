@@ -4,7 +4,7 @@
               text-white space-y-10">
     
     <!-- Image -->
-    <img src="../err.png" alt="404 Error" 
+    <img src="/err.png" alt="404 Error" 
          class="w-64 h-64 object-contain drop-shadow-2xl animate-pulse" />
 
     <!-- Title -->

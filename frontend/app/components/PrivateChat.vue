@@ -165,16 +165,17 @@ const toggleEmojiMenu = (msgId: number) => {
     <div v-if="selectedUser" class="flex items-center justify-between px-6 py-4 bg-zinc-900 border-b border-zinc-700">
       <div class="flex items-center gap-3">
         <img 
-          :src="selectedUser.avatar || '/default-avatar.png'" 
+          :src="selectedUser.avatar || '/chat_app.png'" 
           class="w-10 h-10 rounded-full object-cover border border-zinc-600"
           alt="Avatar"
         />
+        
         <div>
           <h2 class="text-base font-bold text-white">{{ selectedUser.username }}</h2>
           <p v-if="isUserTyping(selectedUser.id)" class="text-xs text-green-400 animate-pulse font-medium">
-            yazıyor...
+            typing...
           </p>
-          <p v-else class="text-xs text-zinc-400">Özel Sohbet</p>
+          <p v-else class="text-xs text-zinc-400"> Private Talks </p>
         </div>
       </div>
     </div>
@@ -197,7 +198,7 @@ const toggleEmojiMenu = (msgId: number) => {
           
           <img 
             v-if="Number(msg.sender_id) !== Number(user?.id || (user as any)?._id)"
-            :src="selectedUser.avatar || '/default-avatar.png'"
+            :src="selectedUser.avatar || '/chat_app.png'"
             class="w-8 h-8 rounded-full object-cover border border-zinc-700 mr-1 shrink-0 mb-1"
             alt="Partner avatar"
           />
@@ -252,13 +253,13 @@ const toggleEmojiMenu = (msgId: number) => {
 
               <div v-else>
                 <p v-if="msg.deleted" class="flex items-center gap-1 text-xs text-zinc-500">
-                  🚫 Bu mesaj silindi
+                  🚫 This message deleted
                 </p>
                 <p v-else class="whitespace-pre-wrap break-all">{{ msg.content }}</p>
               </div>
 
               <span v-if="msg.edited && !msg.deleted" class="text-[9px] text-zinc-400 block text-right mt-0.5">
-                (düzenlendi)
+                (edited)
               </span>
             </div>
           </div>

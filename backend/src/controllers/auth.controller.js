@@ -1,8 +1,9 @@
 import { registerUser, loginUser, forgotPasswordService, resetPasswordService } from '../services/auth.service.js';
 import { transporter } from '../config/mail.js';
 import { pool } from '../config/db.js';
+import { formatAvatarUrl } from "../utils/avatar.js";
 import { UserModel } from '../models/user.model.js';
-import { env } from '../config/env.js';
+import { env } from "../config/env.js"
 
 export const register = async (req, res) => {
       const { user, token } = await registerUser(req.body);
@@ -58,47 +59,55 @@ export const login = async (req, res) => {
         }
 }
 
-//*  -------------  current_user--------------- //
+
+//* ------------- current_user ------------- //
 
 export const current_user = async (req, res) => {
   try {
     const result = await pool.query(
-      "SELECT id, username, email, avatar, latitude, longitude FROM users WHERE id = $1",
+      `
+      SELECT
+        id,
+        username,
+        email,
+        avatar,
+        google_id,
+        latitude,
+        longitude
+      FROM users
+      WHERE id = $1
+      `,
       [req.user.id]
     );
 
     if (result.rows.length === 0) {
-      return res.status(404).json({ message: "User not found" });
+      return res.status(404).json({
+        message: "User not found"
+      });
     }
 
     const user = result.rows[0];
-    let avatarUrl;
 
-    if (env.NODE_ENV === "development") {
-      // Localhost üçün tam URL düzəlt
-      const serverUrl = env.SERVER_URL || "http://localhost:5000";
-      avatarUrl = user.avatar ? `${serverUrl}${user.avatar}` : null;
-    } else {
-      // Production → Cloudinary URL artıq DB-də tam saxlanır
-      avatarUrl = user.avatar;
-    }
-
-    res.json({
+    return res.json({
       id: user.id,
       username: user.username,
       email: user.email,
-      avatar: avatarUrl,
+      avatar: formatAvatarUrl(user.avatar),
+      google_id: user.google_id,
       latitude: user.latitude,
       longitude: user.longitude
     });
+
   } catch (err) {
-    res.status(500).json({ message: "Error fetching profile" });
+    console.error(err);
+
+    return res.status(500).json({
+      message: "Error fetching profile"
+    });
   }
 };
 
-
-//*  -------------  current_user--------------- //
-
+//* ------------- current_user ------------- //
 
 
 
@@ -144,17 +153,31 @@ export const resetPasswordController = async (req, res) => {
 };
 
 
+
 export const googleCallback = (req, res) => {
-  try {
-    const { user, jwtAccess, jwtRefresh } = req.user;
+  console.log("____________ GOOGLE CALLBACK ___________");
 
-    res.cookie("access_token", jwtAccess, { httpOnly: true, sameSite: "lax", secure: false });
-    res.cookie("refresh_token", jwtRefresh, { httpOnly: true, sameSite: "lax", secure: false });
+  const { user, jwtAccess, jwtRefresh } = req.user;
+  console.log("User:", user.id);
 
-    res.redirect("http://localhost:3000/chat");
-  } catch (err) {
-    res.status(400).json({ error: "Google login failed" });
-  }
+  res.cookie("access_token", jwtAccess, {
+  httpOnly: true,
+  secure: false,
+  sameSite: "lax",
+ 
+});
+
+res.cookie("refresh_token", jwtRefresh, {
+  httpOnly: true,
+  secure: false,
+  sameSite: "lax",
+});
+
+  console.log("Cookies written.");
+  console.log("Redirect:", `${env.CLIENT_URL}/chat`);
+
+  return res.redirect(`${env.CLIENT_URL}/success`);
+
 };
 
 

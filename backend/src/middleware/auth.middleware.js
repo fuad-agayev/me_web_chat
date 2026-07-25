@@ -2,17 +2,35 @@
 import { verifyAccessToken} from '../utils/jwt.js';
 
 export const auth = (req, res, next) => {
-       const token = req.cookies.access_token;
+console.log("=================================");
+    console.log("URL:", req.originalUrl);
+   
+    console.log("Cookies:", req.cookies);
 
-       if(!token) {
-           return res.status(401).json({error: "Unauthorized"})
-       }
-        try{
-            //ACCESs token-i alir ve decode eder  ve kullanci isteyiden kullanici acces toekni ile berbaerlesdiri 
-            const decoded = verifyAccessToken(token);
-            req.user = decoded;
-            next();
-        } catch{
-              return res.status(401).json({error: "Invalid or expired token"})
-        }
+    const token = req.cookies.access_token;
+
+    console.log("Access Token:", token);
+
+    if (!token) {
+        console.log("Token yok");
+        return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    try {
+        const decoded = verifyAccessToken(token);
+
+        console.log("Decoded:", decoded);
+
+        req.user = decoded;
+
+        next();
+
+    } catch (err) {
+
+        console.log("JWT Error:", err);
+
+        return res.status(401).json({
+            error: "Invalid & expired token"
+        });
+    }
 };

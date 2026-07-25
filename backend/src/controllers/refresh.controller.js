@@ -6,7 +6,7 @@ export const refresh = (req, res) => {
   try {
     // 🔥 cookie’den refresh token al
     const refreshToken = req.cookies.refresh_token;
-
+    
     if (!refreshToken) {
       return res.status(401).json({ message: "No refresh token" });
     }
@@ -29,7 +29,8 @@ export const refresh = (req, res) => {
     res.cookie("access_token", newAccessToken, {
       httpOnly: true,
       sameSite: "lax",
-      secure: false
+      secure: false,
+      maxAge: 1000 * 60 * 20
     });
 
     return res.json({
@@ -42,3 +43,4 @@ export const refresh = (req, res) => {
     });
   }
 };
+

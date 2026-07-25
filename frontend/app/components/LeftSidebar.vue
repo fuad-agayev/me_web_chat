@@ -28,7 +28,7 @@
     </nav>
 
     <div class="hidden md:flex flex-col items-center">
-      <NuxtLink to="/settings" class="w-12 h-12 rounded-xl border border-white/5 flex items-center justify-center transition-all hover:bg-[#e6e7a9]">
+      <NuxtLink to="/" class="w-12 h-12 rounded-xl border border-white/5 flex items-center justify-center transition-all hover:bg-[#e6e7a9]">
         <Cog6ToothIcon class="w-5 h-5 text-white/50 hover:text-[#bec064] hover:rotate-90 transition-all" />
       </NuxtLink>
     </div>

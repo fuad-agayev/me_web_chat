@@ -29,6 +29,7 @@ const offset = ref(0);
 const text = ref("");
 const messagesContainer = ref<HTMLDivElement | null>(null);
 const shouldAutoScroll = ref(true);   // ← Yeni: Kontrollü scroll
+const activeMessage = ref<number | null>(null);
 
 const editMessage = (m: GlobalMessage) => {
   const result = window.prompt("Edit message:", m.content) as string | null;
@@ -129,6 +130,26 @@ const groupedMessages = computed(() => {
   }
   return Object.fromEntries(groups);
 });
+
+const toggleActions = (id: number) => {
+  activeMessage.value =
+    activeMessage.value === id
+      ? null
+      : id;
+};
+
+let timer: any;
+
+const startPress = (id: number) => {
+  timer = setTimeout(() => {
+    toggleActions(id);
+  }, 600);
+};
+
+const stopPress = () => {
+  clearTimeout(timer);
+};
+
 </script>
 
 <template>
@@ -183,21 +204,37 @@ const groupedMessages = computed(() => {
           <div :class="['flex gap-2 sm:gap-3 max-w-full sm:max-w-[75%]', m.sender_id === user?.id ? 'ml-auto flex-row-reverse' : '']">
             <div class="flex flex-col">
               <div class="flex items-center gap-2 mb-1 px-1">
-                <img :src="m.avatar || '/default-avatar.png'" alt="Avatar" class="w-7 h-7 sm:w-9 sm:h-9 rounded-xl ring-2 ring-zinc-800 shrink-0 border border-zinc-700" />
+                <img :src="m.avatar || '/chat_app.png'" alt="Avatar" class="w-7 h-7 sm:w-9 sm:h-9 rounded-xl ring-2 ring-zinc-800 shrink-0 border border-zinc-700" />
                 <span class="text-[11px] sm:text-xs font-semibold text-white">{{ m.username }}</span>
                 <span class="text-[10px] sm:text-xs text-zinc-500">
                   {{ new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }}
                 </span>
               </div>
 
-              <div :class="['px-3 sm:px-5 py-2.5 sm:py-3 rounded-2xl text-sm sm:text-[15px] leading-relaxed shadow-lg relative', 
-                m.sender_id === user?.id ? 'bg-linear-to-r from-[#7f8176] to-[#f2f7dc] text-zinc-800 rounded-tr-none' : 'bg-zinc-800 text-zinc-300 rounded-tl-none border border-zinc-700']">
+              <div
+               @contextmenu.prevent="toggleActions(m.id)"
+               @touchstart="startPress(m.id)"
+               @touchend="stopPress"
+               @touchmove="stopPress"
+               :class="['px-3 sm:px-5 py-2.5 sm:py-3 rounded-2xl text-sm sm:text-[15px] leading-relaxed shadow-lg relative', 
+              
+                m.sender_id === user?.id 
+                ? 'bg-linear-to-r from-[#7f8176] to-[#f2f7dc] text-zinc-800 rounded-tr-none'
+                : 'bg-zinc-800 text-zinc-300 rounded-tl-none border border-zinc-700']">
                 <template v-if="m.deleted">
                   <span class="italic text-zinc-500">Message deleted</span>
                 </template>
                 <template v-else>{{ m.content }}</template>
 
-                <div v-if="m.sender_id === user?.id" class="absolute -top-1 -right-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                <div 
+                     v-if="m.sender_id === user?.id"
+                     :class="[
+                      'absolute -top-1 -right-1 flex gap-1 transition-all',
+                       activeMessage === m.id
+      ? 'opacity-100'
+      : 'opacity-0 group-hover:opacity-100'
+  ]"
+                 class="absolute -top-1 -right-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-all">
                   <button @click="editMessage(m)" class="text-xs bg-zinc-900 hover:bg-zinc-800 text-yellow-400 w-6 h-6 rounded-full flex items-center justify-center shadow">✎</button>
                   <button @click="deleteGlobalMessage(m.id)" class="text-xs bg-zinc-900 hover:bg-zinc-800 text-red-400 w-6 h-6 rounded-full flex items-center justify-center shadow">🗑</button>
                 </div>

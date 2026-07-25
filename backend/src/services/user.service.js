@@ -21,6 +21,14 @@ export const updateLocationService = async (userId, latitude, longitude) => {
 };
 
 export const changePasswordService = async (userId, oldPassword, newPassword) => {
+ // Kullanıcı bilgilerini al
+   const fullUser = await UserModel.findById(userId);
+
+   // Google hesabı mı?
+   if (fullUser.google_id) {
+      throw new Error("Google accounts cannot change password.");
+   }
+
    const user = await UserModel.findPasswordById(userId);
 
    const ok = await bcrypt.compare(oldPassword, user.password);
@@ -29,7 +37,6 @@ export const changePasswordService = async (userId, oldPassword, newPassword) =>
    const hashed = await bcrypt.hash(newPassword, 10);
                   await UserModel.updatePassword(userId, hashed)
 };
-
 
 
 

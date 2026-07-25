@@ -1,4 +1,5 @@
 import { env } from "../config/env.js";
+import { formatAvatarUrl } from "../utils/avatar.js";
 import { getUsers, updateAvatar, updateLocationService, changePasswordService } from "../services/user.service.js";
 import cloudinary from '../config/cloudinary.js';
 
@@ -6,13 +7,21 @@ import cloudinary from '../config/cloudinary.js';
 export const users = async (req, res) => {
   const data = await getUsers();
   // Avatar URL tam qaytarmaq üçün düzəliş:
-  const serverUrl = env.SERVER_URL || "http://localhost:5000";
+
+  // const serverUrl = env.SERVER_URL || "http://localhost:5000";
+  // const formatted = data.map(u => ({
+  //   ...u,
+  //   avatar: u.avatar ? `${serverUrl}${u.avatar}` : null
+  // }));
+  // res.json(formatted);
+
   const formatted = data.map(u => ({
-    ...u,
-    avatar: u.avatar ? `${serverUrl}${u.avatar}` : null
-  }));
-  res.json(formatted);
-};
+  ...u,
+  avatar: formatAvatarUrl(u.avatar)
+}));
+   return res.json(formatted)
+}
+
 
 
 export const uploadAvatar = async (req, res) => {

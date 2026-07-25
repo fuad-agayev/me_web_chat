@@ -1,12 +1,23 @@
+// middleware/auth.ts
 import { useAuth } from '../composables/useAuth'
+
 export default defineNuxtRouteMiddleware(async () => {
-  const { fetchProfile } = useAuth();
+  const { user, fetchProfile } = useAuth();
+
+  // Eğer kullanıcı zaten yüklüyse tekrar çağırma
+  if (user.value) {
+    return;
+  }
 
   try {
-    await fetchProfile(); // 👈 hem kontrol hem data
-  } catch {
+    await fetchProfile(); // 👈 sadece burada çağır
+  } catch (err) {
+    console.error("Auth middleware error:", err);
     return navigateTo("/login");
   }
 });
+
+
+
 
 

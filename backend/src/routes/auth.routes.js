@@ -2,6 +2,7 @@ import express from 'express';
 import { register, login, verify, current_user, logout, forgotPasswordController, resetPasswordController} from '../controllers/auth.controller.js';
 import { refresh } from "../controllers/refresh.controller.js";
 import { auth } from '../middleware/auth.middleware.js'
+import { env } from "../config/env.js"
 
 import passport from "passport"
 //import passport from "../config/passport.js";
@@ -19,6 +20,6 @@ router.post("/forgot-password", forgotPasswordController);
 router.post("/reset-password", resetPasswordController)
 
 router.get("/google", passport.authenticate("google", { scope: ["profile", "email"], session: false }));
-router.get("/google/callback", passport.authenticate("google", { failureRedirect: "/login", session: false }), googleCallback);
+router.get("/google/callback", passport.authenticate("google", { failureRedirect: `${env.CLIENT_URL}/login`, session: false }), googleCallback);
 
 export default router;

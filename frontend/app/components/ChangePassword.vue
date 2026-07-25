@@ -28,7 +28,7 @@
         <button 
           type="button" 
           @click="$emit('close')" 
-          class="px-4 py-2 rounded-lg bg-zinc-600 text-zinc-200 hover:bg-zinc-500 transition"
+          class="px-4 py-2 rounded-lg bg-zinc-600 text-zinc-200 hover:bg-zinc-400 transition"
         >
           Cancel
         </button>
@@ -40,33 +40,77 @@
         </button>
       </div>
     </form>
+    <div class="relative inline-block">
+      <Transition
+  enter-active-class="transition duration-200"
+  leave-active-class="transition duration-200"
+  enter-from-class="opacity-0"
+  enter-to-class="opacity-100"
+  leave-from-class="opacity-100"
+  leave-to-class="opacity-0"
+>
+  <div
+    v-if="errPopMessage"
+    class="absolute top-full left-16 px-4 rounded-md border border-[#d4cd88] py-2 text-md text-slate-300 shadow-lg whitespace-nowrap z-50"
+  >
+    {{ errPopMessage }}
+  </div>
+</Transition>
+    </div>
   </div>
  </div>
 </template>
 
-
 <script setup lang="ts">
 import { ref } from "vue";
+
 const emit = defineEmits(["close"]);
 
 const oldPassword = ref("");
 const newPassword = ref("");
 const confirmPassword = ref("");
+const errPopMessage = ref("");
+
 
 const submit = async () => {
+  errPopMessage.value = "";
+
   if (newPassword.value !== confirmPassword.value) {
-    alert("Passwords do not match");
+    errPopMessage.value = "Passwords do not match.";
+
+    setTimeout(() => {
+      errPopMessage.value = "";
+    }, 3000);
+
     return;
   }
-  const config = useRuntimeConfig();
-  await $fetch(`${config.public.apiBase}/api/users/changepassword`, {
-    method: "PATCH",
-    body: { oldPassword: oldPassword.value, newPassword: newPassword.value },
-    credentials: "include",
-  });
-  alert("Password updated successfully");
-  // Modalı kapat
-  emit("close"); 
+
+  try {
+    const config = useRuntimeConfig();
+
+    await $fetch(`${config.public.apiBase}/api/users/changepassword`, {
+      method: "PATCH",
+      body: {
+        oldPassword: oldPassword.value,
+        newPassword: newPassword.value
+      },
+      credentials: "include"
+    });
+
+    errPopMessage.value = "✅ Password updated successfully.";
+
+    setTimeout(() => {
+      emit("close");
+    }, 1500);
+
+  } catch (err: any) {
+    errPopMessage.value =
+      err?.data?.message || "Failed to update password.";
+
+    setTimeout(() => {
+      errPopMessage.value = "";
+    }, 3000);
+  }
 };
 </script>
 

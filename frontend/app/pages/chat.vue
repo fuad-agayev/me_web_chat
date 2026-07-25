@@ -21,20 +21,21 @@ const showChangePassword = ref(false);
 
 const toast = ref("");
 const showToast = ref(false);
-
-
-// onMounted(async () => {
-//   await fetchProfile();
-//   await fetchGlobalOnlineUsers();
-// });
+const errorMessage = ref("");
 
 
 onMounted(async () => {
-    await fetchProfile();
-    if (user.value && (user.value.latitude == null || user.value.longitude == null)) {
+    if (user.value &&
+        (user.value.latitude == null || user.value.longitude == null)) {
         showLocationPopup.value = true;
     }
+
     await fetchGlobalOnlineUsers();
+
+     // Browser Notification icazəsi
+    if (Notification.permission === "default") {
+        await Notification.requestPermission();
+    }
 });
 
 
@@ -100,12 +101,26 @@ const showSuccessToast = (message: string) => {
   }, 3000);
 };
 
+const openChangePassword = () => {
+  errorMessage.value = ""; //? köhnə mesaj silinir Mantikti eger sabi deyilde bu dimakik ise
+
+    if (user.value?.google_id) {
+        errorMessage.value="Google accounts cannot change password.";
+
+         setTimeout(() => {
+            errorMessage.value = "";
+        }, 3000);
+        return;
+    }
+
+    showChangePassword.value = true;
+}
+
 definePageMeta({ middleware: "auth" });
 const mode = ref<"private" | "global">("private");
+const search = ref("");
 const selectUser = ref<any>(null);
-
 </script>
-
 
 <template>
   <div class="flex flex-col md:flex-row h-auto md:h-screen text-white bg-zinc-800 overflow-hidden">
@@ -122,11 +137,14 @@ const selectUser = ref<any>(null);
           <!-- User Info -->
           <div v-if="user" class="flex items-center gap-3 p-2 shadow-inner">
             <div class="relative group">
+               <!-- img :src="user?.avatar" ? user?avatar : '/chat_app.png'   I CAN AMKE THIS VARIANT-->
               <img
-                :src="user?.avatar || '/chat_app.png'"
+                 :src="user?.avatar"
+                
                 alt="User avatar"
                 class="w-12 h-12 rounded-full border-2 border-zinc-400 object-cover"
               />
+
               <label
                 class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 
                        flex items-center justify-center rounded-full cursor-pointer transition"
@@ -138,12 +156,41 @@ const selectUser = ref<any>(null);
             <div class="flex-1">
               <h3 class="text-base font-semibold text-zinc-400 truncate">{{ user?.username }}</h3>
               <p class="text-xs text-zinc-300 truncate">{{ user?.email }}</p>
-              <button @click="showChangePassword = true" class="text-xs text-zinc-400 hover:text-[#cecf75] ">
-                    <span class="flex items-center gap-1 font-bold">
-                       <LockClosedIcon class="w-4 h-4" />
-                     Change Password
-                    </span>
-            </button>
+<div class="relative inline-block">
+  <button
+    @click="openChangePassword"
+    :class="[
+      'text-xs text-zinc-400 transition-colors',
+      user?.google_id
+        ? 'hover:text-[#b6805d]'
+        : 'hover:text-[#d1d378]'
+    ]"
+  >
+    <span class="flex items-center gap-1 font-bold">
+      <LockClosedIcon class="w-4 h-4" />
+      Change Password
+    </span>
+  </button>
+
+  <Transition
+    enter-active-class="transition duration-200"
+    leave-active-class="transition duration-200"
+    enter-from-class="opacity-0 scale-95"
+    enter-to-class="opacity-100 scale-100"
+    leave-from-class="opacity-100 scale-100"
+    leave-to-class="opacity-0 scale-95"
+  >
+    <div
+      v-if="errorMessage"
+      class="absolute top-full -left-16 px-4 rounded-md border border-[#d4cd88] py-2 text-xs text-slate-300 shadow-lg whitespace-nowrap z-50"
+    >
+      {{ errorMessage }}
+    </div>
+  </Transition>
+</div>
+
+
+
             </div>
 
             <button @click="logout" class="flex items-center gap-1 px-2 py-1 rounded transition">
@@ -157,9 +204,10 @@ const selectUser = ref<any>(null);
           </div>
           <!-- Search -->
           <input 
+            v-model="search"
             type="text" 
             placeholder="Search ..." 
-            class="w-full px-3 py-2 rounded bg-zinc-700 text-sm text-zinc-300 focus:outline-none focus:ring-2 focus:ring-[#e6e4e0]"
+            class="w-full px-3 py-2 rounded bg-zinc-700 text-sm text-zinc-300 focus:outline-none focus:ring-2 focus:ring-[#eee5d4]"
           />
         </div>
 
@@ -167,7 +215,7 @@ const selectUser = ref<any>(null);
         <div class="flex shadow-md text-sm font-semibold py-4 px-2 gap-2">
           <!-- Private -->
           <button @click="mode='private'" 
-            :class="mode==='private' ? 'flex-1 py-2 bg-linear-to-r from-[#69694c] to-zinc-400 text-white shadow-lg rounded' : 'flex-1 py-2 bg-zinc-700 text-zinc-100 rounded hover:bg-zinc-600'" 
+            :class="mode==='private' ? 'flex-1 py-2 bg-linear-to-r from-[#64644e] to-zinc-400 text-white shadow-lg rounded' : 'flex-1 py-2 bg-zinc-700 text-zinc-100 rounded hover:bg-zinc-600'" 
             class="flex items-center justify-center space-x-2 transition-all">
             <LockClosedIcon class="w-5 h-5" />
             <span>Private</span>
@@ -183,7 +231,7 @@ const selectUser = ref<any>(null);
 
         <!-- User List -->
         <div class="flex-1 overflow-y-auto p-4 shadow-inner">
-          <UserList :mode="mode" @select="selectUser = $event"/>
+          <UserList :mode="mode" @select="selectUser = $event" :search="search"/>
         </div>
       </aside>
 
@@ -245,8 +293,8 @@ class="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
           <ul class="space-y-3 flex-1 overflow-y-auto my-6">
             <li v-for="u in globalOnlineUsers" :key="u.id" 
                 class="flex items-center gap-3 p-3 rounded-md bg-zinc-700 shadow-md shadow-[#585a45] hover:shadow-lg transition">
-              <img :src="u.avatar || '/default-avatar.png'" 
-                   alt="Global user avatar" 
+              <img :src="u.avatar || '/chat_app.png'" 
+                   alt="Global user avatar"
                    class="w-10 h-10 rounded-full border border-zinc-400 shadow-inner" />
               <span class="font-medium">{{ u.username }}</span>
             </li>
