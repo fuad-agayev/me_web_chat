@@ -16,7 +16,7 @@
 
     <!-- Text -->
     <h2 class="mt-6 text-sm font-bold text-[#ececc3]">
-      Signing you in... <br/>
+      Signing you in...!!! <br/>
 
       ✓ Verifying account<br/>
       ✓ Loading profile<br/>
