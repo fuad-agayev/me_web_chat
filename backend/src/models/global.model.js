@@ -1,15 +1,16 @@
 import { pool } from '../config/db.js';
 import { formatAvatarUrl } from '../utils/avatar.js';
+
 export const globalMessageModel = {
 
-  create: async (senderId, content) => {
+  create: async (senderId, content, audio_url) => {
     const r = await pool.query(
       `
-      INSERT INTO global_messages (sender_id, content)
-      VALUES ($1, $2)
+      INSERT INTO global_messages (sender_id, content, audio_url)
+      VALUES ($1, $2, $3)
       RETURNING *
       `,
-      [senderId, content]
+      [senderId, content, audio_url]
     );
 
     return r.rows[0];

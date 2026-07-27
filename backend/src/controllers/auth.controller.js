@@ -173,9 +173,6 @@ res.cookie("refresh_token", jwtRefresh, {
   sameSite: "lax",
 });
 
-  console.log("Cookies written.");
-  console.log("Redirect:", `${env.CLIENT_URL}/chat`);
-
   return res.redirect(`${env.CLIENT_URL}/success`);
 
 };

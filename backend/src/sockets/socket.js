@@ -5,6 +5,7 @@ import { verifyAccessToken } from "../utils/jwt.js";
 import { env } from '../config/env.js';
 import { UserModel } from '../models/user.model.js';
 import { formatAvatarUrl } from '../utils/avatar.js';
+import { formatAudioUrl } from '../utils/audio.js';
 
 import {
   sendMessageService,
@@ -108,8 +109,8 @@ socket.on("getOnlineUsers", () => {
 
            
 
-socket.on("sendGlobalMessage", async ({ content }) => {
-  const msg = await createGlobalMessage(userId, content);
+socket.on("sendGlobalMessage", async ({ content, audio_url }) => {
+  const msg = await createGlobalMessage(userId, content, audio_url);
   const user = await UserModel.findById(userId);
 
   io.emit("newGlobalMessage", {
@@ -117,36 +118,11 @@ socket.on("sendGlobalMessage", async ({ content }) => {
     sender_id: user.id,
     username: user.username,
     avatar: formatAvatarUrl(user.avatar), // user.avatar → avatarPath
+    audio_url:formatAudioUrl(msg.audio_url),
     content: msg.content,
     created_at: msg.created_at
   });
 });
-
-
-        
-// socket.on("sendGlobalMessage", async ({ content }) => {
-//   const msg = await createGlobalMessage(userId, content);
-//   const user = await UserModel.findById(userId);
-
-//   let avatarUrl;
-//   if (env.NODE_ENV === "development") {
-//     const serverUrl = env.SERVER_URL || "http://localhost:5000";
-//     avatarUrl = user.avatar ? `${serverUrl}${user.avatar}` : null;
-//   } else {
-//     avatarUrl = user.avatar;
-//   }
-
-//   io.emit("newGlobalMessage", {
-//     id: msg.id,
-//     sender_id: user.id,
-//     username: user.username,
-//     avatar: avatarUrl,
-//     content: msg.content,
-//     created_at: msg.created_at
-//   });
-// });
-
-
 
 
          socket.on("editGlobalMessage", async ({messageId, content}) => {
@@ -236,8 +212,8 @@ socket.on("removePrivateReaction", async ({ messageId, emoji, receiverId }) => {
     // ======================
     // MESSAGE
     // ======================
-    socket.on("sendMessage", async ({ receiver_id, content }) => {
-      const msg = await sendMessageService(userId, receiver_id, content);
+    socket.on("sendMessage", async ({ receiver_id, content, audio_url }) => {
+      const msg = await sendMessageService(userId, receiver_id, content, audio_url);
 
       io.to(`user_${userId}`).emit("messageSent", msg);
       io.to(`user_${receiver_id}`).emit("newMessage", msg);

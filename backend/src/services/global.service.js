@@ -6,8 +6,8 @@ import { globalUsers } from '../sockets/socket.js';
 import { formatAvatarUrl } from '../utils/avatar.js';
 
 
-export const createGlobalMessage = async (senderId, content) => {
-  const created = await globalMessageModel.create(senderId, content);
+export const createGlobalMessage = async (senderId, content, audio_url) => {
+  const created = await globalMessageModel.create(senderId, content, audio_url);
 
   const r = await pool.query(
     `

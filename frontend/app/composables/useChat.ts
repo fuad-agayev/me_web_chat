@@ -23,7 +23,7 @@ interface Message {
   read?: boolean;
   edited?: boolean;
   deleted?: boolean;
-
+  audio_url?: string;
   created_at?: string;
 }
 
@@ -72,12 +72,13 @@ export const useChat = () => {
   // ======================
   // SEND MESSAGE
   // ======================
-  const sendMessage = (content: string, receiverId: number) => {
+  const sendMessage = (content: string, receiverId: number, audio_url?:string) => {
     if (!selectedUser.value || !content.trim()) return;
 
     socket.emit("sendMessage", {
       receiver_id: selectedUser.value,
       content,
+      audio_url
     });
   };
 

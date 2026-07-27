@@ -1,5 +1,6 @@
 import { env } from "../config/env.js";
 import { formatAvatarUrl } from "../utils/avatar.js";
+import { formatAudioUrl } from "../utils/audio.js";
 import { getUsers, updateAvatar, updateLocationService, changePasswordService } from "../services/user.service.js";
 import cloudinary from '../config/cloudinary.js';
 
@@ -17,14 +18,36 @@ export const users = async (req, res) => {
 
   const formatted = data.map(u => ({
   ...u,
-  avatar: formatAvatarUrl(u.avatar)
+  avatar: formatAvatarUrl(u.avatar),
+ // audio_url: formatAudioUrl(u.audio_url)
 }));
    return res.json(formatted)
 }
 
 
+export const uploadAudioCtrl = async (req, res) => {
+  try {
+    let audioPath;
+    if (env.NODE_ENV === "production") {
+      // Cloudinary
+      const result = await cloudinary.uploader.upload(req.file.path, {
+        folder: "audios",
+        resource_type: "video" // audio/video üçün lazımdır
+      });
+      audioPath = result.secure_url;
+    } else {
+      // Local
+      audioPath = `/uploads/audios/${req.file.filename}`;
+    }
+    res.json({ audio_url: audioPath });
+  } catch (err) {
+    res.status(500).json({ message: "Error uploading audio" });
+  }
+};
 
-export const uploadAvatar = async (req, res) => {
+
+
+export const uploadAvatarCtrl = async (req, res) => {
   try {
     let avatarPath;
 

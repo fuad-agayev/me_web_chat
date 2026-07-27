@@ -11,6 +11,7 @@ export interface GlobalMessage {
   created_at: string;
   username: string;
   avatar?: string;
+  audio_url?: string;
 }
 
 interface User {
@@ -50,9 +51,9 @@ export const useGlobalChat = () => {
   const joinGlobal = () => socket.emit("joinGlobal");
   const leaveGlobal = () => socket.emit("leaveGlobal");
 
-  const sendGlobalMessage = (content: string) => {
+  const sendGlobalMessage = (content: string, audio_url?:string) => {
     if (!content.trim()) return;
-    socket.emit("sendGlobalMessage", { content });
+    socket.emit("sendGlobalMessage", { content, audio_url });
   };
 
   const editGlobalMessage = (messageId: number, content: string) => {

@@ -9,6 +9,7 @@ const props = defineProps<{
     username: string;
     email: string;
     avatar?: string;
+    audio_url?:string;
   } | null;
 }>();
 
@@ -251,12 +252,27 @@ const toggleEmojiMenu = (msgId: number) => {
                 </div>
               </div>
 
+              
+                   <div v-else>
+  <p v-if="msg.deleted" class="flex items-center gap-1 text-xs text-zinc-500">
+    🚫 This message deleted
+  </p>
+  <template v-else>
+    <p v-if="msg.content" class="whitespace-pre-wrap break-all">{{ msg.content }}</p>
+    <audio v-if="msg.audio_url" :src="msg.audio_url" controls class="mt-2 w-48"></audio>
+  </template>
+</div>
+<!--         
               <div v-else>
                 <p v-if="msg.deleted" class="flex items-center gap-1 text-xs text-zinc-500">
                   🚫 This message deleted
                 </p>
                 <p v-else class="whitespace-pre-wrap break-all">{{ msg.content }}</p>
               </div>
+              -->
+            
+
+
 
               <span v-if="msg.edited && !msg.deleted" class="text-[9px] text-zinc-400 block text-right mt-0.5">
                 (edited)
@@ -323,7 +339,7 @@ const toggleEmojiMenu = (msgId: number) => {
           :disabled="!messageInput.trim()"
           class="px-4 py-2.5 rounded-xl text-sm font-semibold bg-linear-to-r from-[#69694c] to-zinc-500 text-white cursor-pointer disabled:opacity-40"
         >
-          Send
+          ✈ Send
         </button>
       </form>
     </div>

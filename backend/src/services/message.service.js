@@ -1,14 +1,11 @@
 import { MessageModel } from '../models/message.model.js';
 import { getReactions } from '../models/reaction.model.js'
-export const sendMessageService = async (sender, receiver, content) => {
-  return  await MessageModel.create(sender, receiver, content);
+
+export const sendMessageService = async (sender, receiver, content, audio_url) => {
+  return  await MessageModel.create(sender, receiver, content, audio_url);
 };
 
-// export const getMessages = async (user1, user2) => {
-//   return await MessageModel.getConversation(user1, user2);
-// };
 
-// Doğru hali:
 export const getMessages = async (senderId, receiverId) => {
   const msgs = await MessageModel.getConversation(senderId, receiverId);
 
