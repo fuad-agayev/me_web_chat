@@ -290,7 +290,7 @@ const handleGlobalRecorderStop = async (file: File, mode: string) => {
           class="flex-1 bg-zinc-800 border border-zinc-700 focus:border-[#666e43] focus:ring-0 rounded-3xl px-4 sm:px-6 py-3 text-sm sm:text-base text-white placeholder-zinc-500 outline-none transition-all"
         />
 
-        
+        <div class="flex flex-col sm:flex-row gap-2 items-center">
            <!--! Fayl seçmək -->
 <label>
   📎
@@ -311,7 +311,7 @@ const handleGlobalRecorderStop = async (file: File, mode: string) => {
   @stop="handleGlobalRecorderStop" 
 />
           <!--! Mikrofon -->
-
+</div>
         <button 
           @click="send"
           :disabled="!text.trim()"
