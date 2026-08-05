@@ -20,8 +20,8 @@ export const demoLogin = async (req, res) => {
     accessToken,
     {
       httpOnly: true,
-      secure: false,
-      sameSite: 'lax',
+      secure: true,
+      sameSite: 'none',
       maxAge: 1000 * 60 * 20
     }
   );
@@ -32,8 +32,8 @@ export const demoLogin = async (req, res) => {
     refreshToken,
     {
       httpOnly: true,
-      secure: false,
-      sameSite: 'lax',
+      secure: true,
+      sameSite: 'none',
       maxAge: 1000 * 60 * 60 * 24 * 7
     }
   );

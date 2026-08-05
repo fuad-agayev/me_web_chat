@@ -7,7 +7,7 @@ export const formatAudioUrl = (audioPath) => {
     return audioPath;
   }
 
-   const serverUrl = env.SERVER_URL || "http://localhost:5000";
+   const serverUrl = env.SERVER_URL || "https://me-web-chat.onrender.com";
 
   // // 2. Production mühitində, amma local uploads istifadə olunursa
   // if (env.NODE_ENV === "production" && audioPath.startsWith("/uploads/audios")) {

@@ -13,7 +13,7 @@ export const formatAvatarUrl = (avatarPath) => {
   if (env.NODE_ENV === "development") {
 
     const serverUrl =
-      env.SERVER_URL || "http://localhost:5000";
+      env.SERVER_URL || "https://me-web-chat.onrender.com";
 
     return `${serverUrl}${avatarPath}`;
   }

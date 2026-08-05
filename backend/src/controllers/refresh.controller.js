@@ -28,8 +28,8 @@ export const refresh = (req, res) => {
     // 🔥 cookie’ye tekrar yaz
     res.cookie("access_token", newAccessToken, {
       httpOnly: true,
-      sameSite: "lax",
-      secure: false,
+      sameSite: "none",
+      secure: true,
       maxAge: 1000 * 60 * 20
     });
 

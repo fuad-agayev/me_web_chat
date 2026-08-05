@@ -46,8 +46,8 @@ export const login = async (req, res) => {
       try{
       const { user, accessToken, refreshToken } = await loginUser(req.body);
 
-      res.cookie('access_token', accessToken , {httpOnly: true, sameSite: "lax", secure: false});
-      res.cookie('refresh_token', refreshToken, {httpOnly: true, sameSite: "lax", secure: false})
+      res.cookie('access_token', accessToken , {httpOnly: true, sameSite: "none", secure: true});
+      res.cookie('refresh_token', refreshToken, {httpOnly: true, sameSite: "none", secure: true})
       res.json({
             id: user.id,
             username: user.username,
@@ -115,14 +115,14 @@ export const current_user = async (req, res) => {
   export const logout = (req, res) => {
   res.clearCookie("access_token", {
     httpOnly: true,
-    sameSite: "lax",
-    secure: false,
+    sameSite: "none",
+    secure: true,
   });
 
   res.clearCookie("refresh_token", {
     httpOnly: true,
-    sameSite: "lax",
-    secure: false
+    sameSite: "none",
+    secure: true
     // secure: env.NODE_ENV === "production", WE can make it all as This
   });
 
@@ -163,15 +163,15 @@ export const googleCallback = (req, res) => {
 
   res.cookie("access_token", jwtAccess, {
   httpOnly: true,
-  sameSite: "lax",
-  secure: false
+  sameSite: "none",
+  secure: true
   //secure:env.NODE_ENV==="production"?true:false,
 });
 
 res.cookie("refresh_token", jwtRefresh, {
   httpOnly: true,
-  sameSite: "lax",
-  secure: false
+  sameSite: "none",
+  secure: true
    //secure: env.NODE_ENV === "production", OR  env.NODE_ENV==="production"?true:false,
 });
 
