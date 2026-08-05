@@ -13,7 +13,7 @@ export default defineNuxtRouteMiddleware(async () => {
     await fetchProfile(); // 👈 sadece burada çağır
   } catch (err) {
     console.error("Auth middleware error:", err);
-    return navigateTo("/login");
+       return navigateTo("/login");
   }
 });
 

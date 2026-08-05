@@ -2,7 +2,6 @@
 import { Socket } from "socket.io-client";
 import { useApi } from "~/composables/refreshApi";
 
-
 interface Reaction {
   id: number;
   messageId: number;
@@ -69,18 +68,25 @@ export const useChat = () => {
     messages.value = res as Message[];
   };
 
-  // ======================
-  // SEND MESSAGE
-  // ======================
-  const sendMessage = (content: string, receiverId: number, audio_url?:string) => {
-    if (!selectedUser.value || !content.trim()) return;
+  
+  // _________________  SEND MESSAGE  __________________||
+  
+ 
+const sendMessage = (content: string, receiverId: number, audio_url?: string) => {
+    console.count("FRONTEND sendMessage");
+  if (!selectedUser.value) return;
+  // həm content, həm audio boşdursa göndərmə
+  if (!content.trim() && !audio_url) return;
 
-    socket.emit("sendMessage", {
-      receiver_id: selectedUser.value,
-      content,
-      audio_url
-    });
-  };
+  socket.emit("sendMessage", {
+    //receiver_id: selectedUser.value,
+    receiver_id: receiverId,
+    content,
+    audio_url
+  });
+};
+
+
 
   // ======================
   // TYPING
@@ -110,9 +116,9 @@ const removeReaction = (messageId: number, emoji: string, receiverId: number) =>
   socket.emit("removePrivateReaction", { messageId, emoji, receiverId });
 };
 
-  // ======================
-  // SOCKET LISTENERS
-  // ======================
+  
+  // ________________SOCKET LISTENERS_________________\\
+  
   const initListeners = () => {
     // cleanup
     socket.off("connect");
@@ -182,27 +188,40 @@ socket.on("userOnline", ({ userId }) => {
       userLastSeen.value[userId] = lastSeen || null;
     });
 
-    // ======================
-    // MESSAGES
-    // ======================
-    socket.on("messageSent", (msg: Message) => {
-      if (!messages.value.some((m) => m.id === msg.id)) {
-        messages.value.push(msg);
-      }
-    });
+    
+    // _____________   MESSAGES  _________________//
+  
 
-    socket.on("newMessage", (msg: Message) => {
-      if (!messages.value.some((m) => m.id === msg.id)) {
-        messages.value.push(msg);
-      }
+  socket.on("messageSent", (msg: Message) => {
+  if (msg.audio_url) {
+    if (!messages.value.some(m => m.audio_url === msg.audio_url && m.sender_id === msg.sender_id)) {
+      messages.value.push(msg);
+    }
+  } else {
+    if (!messages.value.some(m => m.id === msg.id)) {
+      messages.value.push(msg);
+    }
+  }
+});
 
-      if (Notification.permission === "granted") {
+socket.on("newMessage", (msg: Message) => {
+  if (msg.audio_url) {
+    if (!messages.value.some(m => m.audio_url === msg.audio_url && m.sender_id === msg.sender_id)) {
+      messages.value.push(msg);
+    }
+  } else {
+    if (!messages.value.some(m => m.id === msg.id)) {
+      messages.value.push(msg);
+    }
+  }
+
+  if (Notification.permission === "granted") {
     new Notification("You Have message..!", {
       body: msg.content,
       icon: "/chat_app.png"
     });
   }
-    });
+});
 
     socket.on("messageRead", ({ messageId }) => {
       const msg = messages.value.find((m) => m.id === messageId);
@@ -308,13 +327,14 @@ socket.on("privateReactionRemoved", (data: any) => {
 
 
   };
+// ________________SOCKET LISTENERS_________________\\
+  
 
-  // ======================
-  // HELPERS
-  // ======================
+// ________________   HELPERS       _________________\\
   const isUserOnline = (userId: number) => {
     return onlineUsers.value.includes(userId);
   };
+  
 
   const isUserTyping = (userId: number) => {
     return typingUsers.value.includes(userId);
@@ -323,10 +343,10 @@ socket.on("privateReactionRemoved", (data: any) => {
   const getLastSeen = (userId: number) => {
     return userLastSeen.value[userId] || null;
   };
+// ________________SOCKET LISTENERS_________________\\
 
-  // ======================
-  // RETURN
-  // ======================
+
+  
   return {
     // state
     messages,

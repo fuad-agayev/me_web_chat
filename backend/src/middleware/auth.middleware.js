@@ -2,7 +2,7 @@
 import { verifyAccessToken} from '../utils/jwt.js';
 
 export const auth = (req, res, next) => {
-console.log("=================================");
+console.log("___________________________");
     console.log("URL:", req.originalUrl);
    
     console.log("Cookies:", req.cookies);

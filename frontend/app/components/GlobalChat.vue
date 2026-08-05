@@ -5,7 +5,16 @@ import { useAuth } from "~/composables/useAuth";
 import { nextTick, ref, watch, computed, onMounted, onUnmounted } from "vue";
 import type { GlobalMessage } from "~/composables/useGlobalChat";
 
+import AudioPlayer from "~/components/AudioPlayer.vue";
+import VoiceRecorder from "~/components/VoiceRecorder.vue";
+import { useGlobalAudioMessages } from "../composables/useGlobalMessages";
+
+
+
+const { sendGlobalAudioMessage } = useGlobalAudioMessages();
 const { user } = useAuth();
+
+
 
 const {
   messages,
@@ -30,6 +39,7 @@ const text = ref("");
 const messagesContainer = ref<HTMLDivElement | null>(null);
 const shouldAutoScroll = ref(true);   // ← Yeni: Kontrollü scroll
 const activeMessage = ref<number | null>(null);
+const voiceMessages = ref<File[]>([]);
 
 const editMessage = (m: GlobalMessage) => {
   const result = window.prompt("Edit message:", m.content) as string | null;
@@ -150,6 +160,23 @@ const stopPress = () => {
   clearTimeout(timer);
 };
 
+
+const handleGlobalFileChange = async (e: Event) => {
+  const input = e.target as HTMLInputElement;
+  const file = input.files?.[0];
+  if (file) {
+    const res = await sendGlobalAudioMessage(file); // upload + audio_url
+    sendGlobalMessage("", res.audio_url);           // socket emit
+  }
+};
+
+const handleGlobalRecorderStop = async (file: File, mode: string) => {
+  if (mode === "global") {
+    const res = await sendGlobalAudioMessage(file);
+    sendGlobalMessage("", res.audio_url);
+  }
+};
+
 </script>
 
 <template>
@@ -209,6 +236,8 @@ const stopPress = () => {
                 <span class="text-[10px] sm:text-xs text-zinc-500">
                   {{ new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }}
                 </span>
+
+                
               </div>
 
               <div
@@ -224,8 +253,11 @@ const stopPress = () => {
                 <template v-if="m.deleted">
                   <span class="italic text-zinc-500">Message deleted</span>
                 </template>
-                <template v-else>{{ m.content }}</template>
-
+                <template v-else>
+                  <p class=""> {{ m.content }} </p>
+                   <AudioPlayer v-if="m.audio_url" :src="m.audio_url" />
+                </template>
+                 
                 <div 
                      v-if="m.sender_id === user?.id"
                      :class="[
@@ -257,6 +289,29 @@ const stopPress = () => {
           placeholder="Type a message..."
           class="flex-1 bg-zinc-800 border border-zinc-700 focus:border-[#666e43] focus:ring-0 rounded-3xl px-4 sm:px-6 py-3 text-sm sm:text-base text-white placeholder-zinc-500 outline-none transition-all"
         />
+
+        
+           <!--! Fayl seçmək -->
+<label>
+  📎
+  <input 
+    type="file" 
+    accept="audio/*" 
+    class="hidden"
+    @change="handleGlobalFileChange"
+  />
+</label>
+          <!--! Fayl seçmək -->
+ 
+
+
+           <!--! Mikrofon -->
+<VoiceRecorder 
+  mode="global" 
+  @stop="handleGlobalRecorderStop" 
+/>
+          <!--! Mikrofon -->
+
         <button 
           @click="send"
           :disabled="!text.trim()"

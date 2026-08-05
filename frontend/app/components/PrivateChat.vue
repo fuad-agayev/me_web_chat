@@ -3,6 +3,12 @@ import { ref, watch, onMounted, nextTick } from "vue";
 import { useChat } from "~/composables/useChat";
 import { useAuth } from "~/composables/useAuth";
 
+import AudioPlayer from "~/components/AudioPlayer.vue";
+import VoiceRecorder from "~/components/VoiceRecorder.vue";
+import { usePrivateMessages } from "../composables/usePrivateMessages.js";
+
+const { user } = useAuth(); 
+
 const props = defineProps<{
   selectedUser: {
     id: number;
@@ -13,7 +19,7 @@ const props = defineProps<{
   } | null;
 }>();
 
-const { user } = useAuth(); 
+
 const {
   messages,
   selectedUser: chatSelectedUser,
@@ -27,6 +33,11 @@ const {
   isUserTyping,
   isUserOnline
 } = useChat();
+
+
+const { sendAudioMessage} = usePrivateMessages(messages,user);
+
+
 
 const messageInput = ref("");
 const editingMessageId = ref<number | null>(null);
@@ -64,7 +75,7 @@ watch(() => props.selectedUser, async (newUser) => {
   if (newUser) {
     chatSelectedUser.value = Number(newUser.id);
     await fetchMessages(newUser.id);
-    initListeners();
+    //initListeners();
     scrollToBottom();
     markAllAsRead();
   } else {
@@ -81,6 +92,7 @@ onMounted(() => {
   initListeners();
   scrollToBottom();
 });
+
 
 let typingTimeout: NodeJS.Timeout;
 const handleKeyDown = () => {
@@ -158,6 +170,23 @@ const toggleReaction = (msgId: number, emoji: string) => {
 const toggleEmojiMenu = (msgId: number) => {
   activeEmojiMenuId.value = activeEmojiMenuId.value === msgId ? null : msgId;
 };
+
+
+const handleFileChange = async (e: Event) => {
+  const input = e.target as HTMLInputElement;
+  const file = input.files?.[0];
+  if (file && chatSelectedUser.value) {
+    const res = await sendAudioMessage(file, chatSelectedUser.value);
+    sendMessage("", chatSelectedUser.value, res.audio_url); // socket emit
+  }
+};
+
+const handleRecorderStop = async (file: File, mode: string) => {
+  if (mode === "private" && chatSelectedUser.value) {
+    const res = await sendAudioMessage(file, chatSelectedUser.value);
+    sendMessage("", chatSelectedUser.value, res.audio_url);
+  }
+};
 </script>
 
 <template>
@@ -195,6 +224,8 @@ const toggleEmojiMenu = (msgId: number) => {
         class="flex flex-col max-w-[85%]"
         :class="Number(msg.sender_id) === Number(user?.id || (user as any)?._id) ? 'ml-auto items-end' : 'mr-auto items-start'"
       >
+       <!-- yoxlama -->
+  {{ console.log("PrivateChat msg.audio_url:", msg.audio_url) }}
         <div class="flex items-end gap-2 w-full" :class="Number(msg.sender_id) === Number(user?.id || (user as any)?._id) ? 'justify-end' : 'justify-start'">
           
           <img 
@@ -259,8 +290,10 @@ const toggleEmojiMenu = (msgId: number) => {
   </p>
   <template v-else>
     <p v-if="msg.content" class="whitespace-pre-wrap break-all">{{ msg.content }}</p>
-    <audio v-if="msg.audio_url" :src="msg.audio_url" controls class="mt-2 w-48"></audio>
+    
+ <AudioPlayer v-if="msg.audio_url" :src="msg.audio_url" />
   </template>
+  
 </div>
 <!--         
               <div v-else>
@@ -334,12 +367,35 @@ const toggleEmojiMenu = (msgId: number) => {
           placeholder="Mesajınızı yazın..." 
           class="flex-1 px-4 py-2.5 rounded-xl bg-zinc-800 text-sm text-zinc-200 border border-zinc-700 focus:outline-none focus:ring-2 focus:ring-[#777c5c]"
         />
+
+           <!--! Fayl seçmək -->
+<label>
+    📎
+<input 
+  type="file" 
+  accept="audio/*" 
+  class="hidden"
+  @change="handleFileChange"
+/>
+</label>
+
+          <!--! Fayl seçmək -->
+
+           <!--! Mikrofon -->
+
+<VoiceRecorder 
+  mode="private" 
+  @stop="handleRecorderStop" 
+/>
+          <!--! Mikrofon -->
+
         <button 
           type="submit"
           :disabled="!messageInput.trim()"
-          class="px-4 py-2.5 rounded-xl text-sm font-semibold bg-linear-to-r from-[#69694c] to-zinc-500 text-white cursor-pointer disabled:opacity-40"
+          class="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center bg-linear-to-br from-[#b4c279] to-[#c6d484] hover:from-[#a9b672] hover:to-[#666e43] 
+          disabled:opacity-50 disabled:cursor-not-allowed rounded-2xl text-zinc-900 font-bold text-xl sm:text-2xl transition-all active:scale-95"
         >
-          ✈ Send
+          ↑
         </button>
       </form>
     </div>

@@ -1,8 +1,9 @@
 import { env } from "../config/env.js";
 import { formatAvatarUrl } from "../utils/avatar.js";
 import { formatAudioUrl } from "../utils/audio.js";
+import { MessageModel } from "../models/message.model.js"
 import { getUsers, updateAvatar, updateLocationService, changePasswordService } from "../services/user.service.js";
-import cloudinary from '../config/cloudinary.js';
+//import cloudinary from '../config/cloudinary.js';
 
 
 export const users = async (req, res) => {
@@ -25,21 +26,72 @@ export const users = async (req, res) => {
 }
 
 
+// export const uploadAudioCtrl = async (req, res) => {
+//   try {
+//     let audioPath;
+//     if (env.NODE_ENV === "production") {
+//       const result = await cloudinary.uploader.upload(req.file.path, {
+//         folder: "chats/audios",
+//         resource_type: "video"
+//       });
+//       audioPath = result.secure_url; // Cloudinary URL
+//     } else {
+//       audioPath = `/uploads/audios/${req.file.filename}`; // Local path
+//     }
+
+   
+//     const formattedUrl = formatAudioUrl(audioPath);
+
+//     const receiverId = req.body.receiverId;
+//     if (receiverId) {
+//       const msg = await MessageModel.create(
+//         req.user.id,
+//         receiverId,
+//         "",
+//         formattedUrl
+//       );
+//       return res.json({ ...msg, audio_url: formattedUrl });
+//     }
+
+//     res.json({ audio_url: formattedUrl });
+//   } catch (err) {
+//     res.status(500).json({ message: "Error uploading audio" });
+//   }
+// };
+
 export const uploadAudioCtrl = async (req, res) => {
   try {
+
+    //!if esle YERINE BUNALIR DA YAPAbilirdik
+    //? const audioPath = env.NODE_ENV === "production"
+    //?                  ? req.file.path
+    //?                  : `/uploads/audios/${req.file.filename}`;
+
+
     let audioPath;
     if (env.NODE_ENV === "production") {
-      // Cloudinary
-      const result = await cloudinary.uploader.upload(req.file.path, {
-        folder: "audios",
-        resource_type: "video" // audio/video üçün lazımdır
-      });
-      audioPath = result.secure_url;
+      audioPath = req.file.path;
+       //?  multer-storage-cloudinary  Kullaniyorsak  secure_url lazım deyil, çünki Cloudinary URL-ni avtomatik qaytarır.
+      console.log("Audio req file: ", req.file);
     } else {
-      // Local
-      audioPath = `/uploads/audios/${req.file.filename}`;
+      audioPath = `/uploads/audios/${req.file.filename}`; // Local path
     }
-    res.json({ audio_url: audioPath });
+
+   
+    const formattedUrl = formatAudioUrl(audioPath);
+
+    // const receiverId = req.body.receiverId;
+    // if (receiverId) {
+    //   const msg = await MessageModel.create(
+    //     req.user.id,
+    //     receiverId,
+    //     "",
+    //     formattedUrl
+    //   );
+    //   return res.json({ ...msg, audio_url: formattedUrl });
+    // }
+    //  res.json({ audio_url: formattedUrl });
+   return  res.json({ audio_url: formattedUrl });
   } catch (err) {
     res.status(500).json({ message: "Error uploading audio" });
   }
@@ -47,16 +99,37 @@ export const uploadAudioCtrl = async (req, res) => {
 
 
 
+// export const uploadAvatarCtrl = async (req, res) => {
+//   try {
+//     let avatarPath;
+
+//     if (env.NODE_ENV === "production") {
+//       // Production → Cloudinary
+//       const result = await cloudinary.uploader.upload(req.file.path, {
+//         folder: "chats/avatars"
+//       });
+//       avatarPath = result.secure_url;
+//     } else {
+//       // Development → Localhost
+//       avatarPath = `/uploads/avatars/${req.file.filename}`;
+//     }
+
+//     await updateAvatar(req.user.id, avatarPath);
+//     res.json({ avatar: avatarPath });
+//   } catch (err) {
+//     res.status(500).json({ message: "Error uploading avatar" });
+//   }
+// };
+
+
 export const uploadAvatarCtrl = async (req, res) => {
   try {
     let avatarPath;
 
     if (env.NODE_ENV === "production") {
-      // Production → Cloudinary
-      const result = await cloudinary.uploader.upload(req.file.path, {
-        folder: "avatars"
-      });
-      avatarPath = result.secure_url;
+      avatarPath = req.file.path;
+      //?  multer-storage-cloudinary  Kullaniyorsak  secure_url lazım deyil, çünki Cloudinary URL-ni avtomatik qaytarır.
+      console.log("Avatar req file: ", req.file);
     } else {
       // Development → Localhost
       avatarPath = `/uploads/avatars/${req.file.filename}`;

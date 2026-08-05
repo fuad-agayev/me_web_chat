@@ -6,13 +6,22 @@ export const formatAudioUrl = (audioPath) => {
   if (audioPath.startsWith("http")) {
     return audioPath;
   }
-  // Local uploads (yalnız developmentdə)
+
+   const serverUrl = env.SERVER_URL || "http://localhost:5000";
+
+  // // 2. Production mühitində, amma local uploads istifadə olunursa
+  // if (env.NODE_ENV === "production" && audioPath.startsWith("/uploads/audios")) {
+  //   return `${serverUrl}${audioPath}`;
+  // }
+
   if (env.NODE_ENV === "development") {
-    const serverUrl = env.SERVER_URL || "http://localhost:5000";
+    //const serverUrl = env.SERVER_URL || "http://localhost:5000";
     return `${serverUrl}${audioPath}`;
   }
   return audioPath;
 };
+
+
 
 
 

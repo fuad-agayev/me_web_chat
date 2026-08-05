@@ -2,6 +2,13 @@ import { pool } from '../config/db.js';
 
 export const MessageModel = {
   create: async (sender, receiver, content, audio_url) => {
+     console.log("INSERT MESSAGE", {
+    sender,
+    receiver,
+    content,
+    audio_url
+  });
+
     const r = await pool.query("INSERT INTO messages (sender_id, receiver_id, content, audio_url) VALUES ($1, $2, $3, $4) RETURNING *",
       [sender, receiver, content, audio_url])
     return r.rows[0];

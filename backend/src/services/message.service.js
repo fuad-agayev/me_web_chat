@@ -1,8 +1,10 @@
 import { MessageModel } from '../models/message.model.js';
 import { getReactions } from '../models/reaction.model.js'
+import { formatAudioUrl } from "../utils/audio.js";
 
-export const sendMessageService = async (sender, receiver, content, audio_url) => {
-  return  await MessageModel.create(sender, receiver, content, audio_url);
+export const sendMessageService = async (sender, receiver, content, audioPath) => {
+       const formattedUrl = formatAudioUrl(audioPath);
+  return  await MessageModel.create(sender, receiver, content, formattedUrl);
 };
 
 

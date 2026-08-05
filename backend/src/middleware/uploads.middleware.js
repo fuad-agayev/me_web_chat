@@ -14,8 +14,8 @@ if(env.NODE_ENV === "production") {
    storage = new CloudinaryStorage({
       cloudinary,
       params: {
-        folder: "avatars",
-        allowed_formats: ["png", "jpg", "jpeg", "webp"],
+        folder: "chats/avatars",
+        allowed_formats: ["png", "jpg", "jpeg", "webp", "gif", "svg", "avif"],
         public_id: (req, file) => 
                Date.now() + "-" + Math.round(Math.random() * 1e9)
       },
@@ -43,7 +43,7 @@ if(env.NODE_ENV === "production") {
   storageAudio = new CloudinaryStorage({
     cloudinary,
     params: {
-      folder: "audios",
+      folder: "chats/audios",
       resource_type: "video",
       allowed_formats: ["mp3", "wav", "ogg", "webm","m4a", "aac"],
       public_id: () => Date.now() + "-" + Math.round(Math.random() * 1e9)

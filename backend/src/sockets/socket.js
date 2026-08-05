@@ -110,7 +110,8 @@ socket.on("getOnlineUsers", () => {
            
 
 socket.on("sendGlobalMessage", async ({ content, audio_url }) => {
-  const msg = await createGlobalMessage(userId, content, audio_url);
+  const formattedUrl = formatAudioUrl(audio_url);
+  const msg = await createGlobalMessage(userId, content, formattedUrl);
   const user = await UserModel.findById(userId);
 
   io.emit("newGlobalMessage", {
@@ -118,7 +119,7 @@ socket.on("sendGlobalMessage", async ({ content, audio_url }) => {
     sender_id: user.id,
     username: user.username,
     avatar: formatAvatarUrl(user.avatar), // user.avatar → avatarPath
-    audio_url:formatAudioUrl(msg.audio_url),
+    audio_url: formattedUrl, // formatAudioUrl(msg.audio_url)
     content: msg.content,
     created_at: msg.created_at
   });
@@ -209,14 +210,20 @@ socket.on("removePrivateReaction", async ({ messageId, emoji, receiverId }) => {
 // _________________________    REACTIONS ______________________ ||
 
 
-    // ======================
-    // MESSAGE
-    // ======================
+   
+    // ________________  MESSAGE  ______________// 
+  
     socket.on("sendMessage", async ({ receiver_id, content, audio_url }) => {
+         console.log("SEND MESSAGE EVENT", {
+        receiver_id,
+        content,
+        audio_url
+    });
       const msg = await sendMessageService(userId, receiver_id, content, audio_url);
 
       io.to(`user_${userId}`).emit("messageSent", msg);
       io.to(`user_${receiver_id}`).emit("newMessage", msg);
+
     });
 
     // READ
@@ -298,6 +305,7 @@ socket.on("disconnect", async () => {
 // ?  guvenlik acisi deyildir
 //?   V e  bu silmei hangi refresh bitdikde chat bitsin gibi yamak istedidke vey gureki kontrol ederke toekn verilmeis ilede yapabiliriz  kodlarini asagifdakilat 
 //? ilave edebiliriz ANcak gerek yokUNUTMAAAAAAAAAAAAAA bu mantiki!!!!!!
+//*BU KISIM EN BASD KIDIR MIDDLEWARE -dir
 // io.use((socket, next) => {
 //   const cookies = cookie.parse(socket.handshake.headers.cookie || "");
 //   const token = cookies.access_token;
@@ -307,11 +315,12 @@ socket.on("disconnect", async () => {
 //   socket.user = verifyAccessToken(token);
 //   next();
 // });
-//* Bu kısım doğru. Ama sadece ilk bağlantıda çalışıyor.
 
-// 🔹 2. Her mesajda veya belirli aralıklarla token kontrolü
-// Burada ek yapman lazım. Örneğin sendMessage event’inde:
-
+//*  Bu da ayric atek bir socket.on -a yapmakla yontmei ayricalikli EVENtlere yapmak yontemi ----OZEL olarak ---
+//? 🔹 2. Her mesajda veya belirli aralıklarla token kontrolü
+//? Burada ek yapman lazım. Örneğin sendMessage event’inde:
+//?Burada hər mesaj göndəriləndə token yenidən yoxlanılır.
+//?Bu təhlükəsizlik baxımından güclüdür, amma performans baxımından ağırdır.
 // js
 // socket.on("sendMessage", async ({ receiver_id, content }) => {
 //   try {
@@ -326,15 +335,16 @@ socket.on("disconnect", async () => {
 //     socket.disconnect(); // Token geçersizse bağlantıyı kes
 //   }
 // });
-// 🔹 3. Alternatif: Periyodik kontrol
+//? 🔹 3. Alternatif: Periyodik kontrol Periyodik yoxlama → daha yüngül, amma kiçik gecikmə riski var.
+
 //* Her mesajda kontrol yapmak yerine, belirli aralıklarla (örneğin her 1 dakikada bir) token doğrulaması yapabilirsin:
 
-// js
-// setInterval(() => {
-//   try {
-//     verifyAccessToken(cookie.parse(socket.handshake.headers.cookie || "").access_token);
-//   } catch (err) {
-//     socket.emit("error", "Session expired");
-//     socket.disconnect();
-//   }
-// }, 60000); // her 60 saniyede bir kontrol
+//? setInterval(() => {
+//?   try {
+//?     verifyAccessToken(cookie.parse(socket.handshake.headers.cookie || "").access_token);
+//?   } catch (err) {
+//?     socket.emit("error", "Session expired");
+//?     socket.disconnect();
+//?   }
+//? }, 60000); // her 60 saniyede bir kontrol
+//!Bu performans baxımından yüngüldür, amma təhlükəsizlikdə kiçik boşluq yaradır (token vaxtı bitibsə, 1 dəqiqəlik gecikmə ola bilər).

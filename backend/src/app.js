@@ -17,7 +17,7 @@ app.use(cookieParser());
 // Passport
 app.use(passport.initialize());
 
-//app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
+//app.use("/uploads", express.static(path.join(process.cwd(), "uploads"))); CLoudinary olcak sa bulazimdeyildi Uploads olsa bunu acmka lazim
 
 if (env.NODE_ENV === "development") {
  app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));

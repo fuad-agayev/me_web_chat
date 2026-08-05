@@ -51,10 +51,15 @@ export const useGlobalChat = () => {
   const joinGlobal = () => socket.emit("joinGlobal");
   const leaveGlobal = () => socket.emit("leaveGlobal");
 
-  const sendGlobalMessage = (content: string, audio_url?:string) => {
-    if (!content.trim()) return;
-    socket.emit("sendGlobalMessage", { content, audio_url });
-  };
+  // const sendGlobalMessage = (content: string, audio_url?:string) => {
+  //   if (!content.trim()) return;
+  //   socket.emit("sendGlobalMessage", { content, audio_url });
+  // };
+
+  const sendGlobalMessage = (content: string, audio_url?: string) => {
+  if (!content.trim() && !audio_url) return;
+  socket.emit("sendGlobalMessage", { content, audio_url });
+};
 
   const editGlobalMessage = (messageId: number, content: string) => {
     socket.emit("editGlobalMessage", { messageId, content });
@@ -80,25 +85,40 @@ export const useGlobalChat = () => {
   const initGlobalListeners = (messagesContainer?: Ref<HTMLDivElement|null>, user?: User) => {
     cleanupGlobalListeners(); // əvvəlcə təmizlə
 
+
+    
     socket.on("newGlobalMessage", (msg: GlobalMessage) => {
-      if (!messages.value.some(m => m.id === msg.id)) {
-        messages.value.push(msg);
-        nextTick(() => {
-          const container = messagesContainer?.value;
-          if (container) {
-            if (msg.sender_id === user?.id) {
-              container.scrollTop = container.scrollHeight;
-            } else {
-              const threshold = 100;
-              const nearBottom = container.scrollTop + container.clientHeight >= container.scrollHeight - threshold;
-              if (nearBottom) {
-                container.scrollTop = container.scrollHeight;
-              }
-            }
-          }
-        });
+  if (msg.audio_url) {
+    // Audio mesajlar üçün yoxlama
+    if (!messages.value.some(m => m.audio_url === msg.audio_url && m.sender_id === msg.sender_id)) {
+      messages.value.push(msg);
+    }
+  } else {
+    // Yazılı mesajlar üçün yoxlama
+    if (!messages.value.some(m => m.id === msg.id)) {
+      messages.value.push(msg);
+    }
+  }
+  nextTick(() => {
+    const container = messagesContainer?.value;
+    if (container) {
+      if (msg.sender_id === user?.id) {
+        container.scrollTop = container.scrollHeight;
+      } else {
+        const threshold = 100;
+        const nearBottom = container.scrollTop + container.clientHeight >= container.scrollHeight - threshold;
+        if (nearBottom) {
+          container.scrollTop = container.scrollHeight;
+        }
       }
-    });
+    }
+  });
+});
+
+
+
+
+
 
     socket.on("globalMessageEdited", (updated: GlobalMessage) => {
       const index = messages.value.findIndex((m) => m.id === updated.id);

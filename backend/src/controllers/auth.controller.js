@@ -116,13 +116,14 @@ export const current_user = async (req, res) => {
   res.clearCookie("access_token", {
     httpOnly: true,
     sameSite: "lax",
-    secure: false
+    secure: false,
   });
 
   res.clearCookie("refresh_token", {
     httpOnly: true,
     sameSite: "lax",
     secure: false
+    // secure: env.NODE_ENV === "production", WE can make it all as This
   });
 
   res.json({ message: "Logged out" });
@@ -162,19 +163,18 @@ export const googleCallback = (req, res) => {
 
   res.cookie("access_token", jwtAccess, {
   httpOnly: true,
-  secure: false,
   sameSite: "lax",
- 
+  secure: false
+  //secure:env.NODE_ENV==="production"?true:false,
 });
 
 res.cookie("refresh_token", jwtRefresh, {
   httpOnly: true,
-  secure: false,
   sameSite: "lax",
+  secure: false
+   //secure: env.NODE_ENV === "production", OR  env.NODE_ENV==="production"?true:false,
 });
 
   return res.redirect(`${env.CLIENT_URL}/success`);
 
 };
-
-
