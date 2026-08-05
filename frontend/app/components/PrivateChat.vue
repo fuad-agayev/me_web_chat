@@ -367,7 +367,7 @@ const handleRecorderStop = async (file: File, mode: string) => {
           placeholder="Mesajınızı yazın..." 
           class="flex-1 px-4 py-2.5 rounded-xl bg-zinc-800 text-sm text-zinc-200 border border-zinc-700 focus:outline-none focus:ring-2 focus:ring-[#777c5c]"
         />
-
+<div class="flex flex-col sm:flex-row gap-2 items-center">
            <!--! Fayl seçmək -->
 <label>
     📎
@@ -388,7 +388,7 @@ const handleRecorderStop = async (file: File, mode: string) => {
   @stop="handleRecorderStop" 
 />
           <!--! Mikrofon -->
-
+</div>
         <button 
           type="submit"
           :disabled="!messageInput.trim()"
