@@ -358,47 +358,53 @@ const handleRecorderStop = async (file: File, mode: string) => {
       </div>
     </div>
 
-    <div v-if="selectedUser" class="p-4 bg-zinc-900 border-t border-zinc-700/70">
-      <form @submit.prevent="handleSend" class="flex items-center gap-2">
-        <input 
-          v-model="messageInput"
-          @keydown="handleKeyDown"
-          type="text" 
-          placeholder="Mesajınızı yazın..." 
-          class="flex-1 px-4 py-2.5 rounded-xl bg-zinc-800 text-sm text-zinc-200 border border-zinc-700 focus:outline-none focus:ring-2 focus:ring-[#777c5c]"
-        />
 
-           <!--! Fayl seçmək -->
-<label>
-    📎
-<input 
-  type="file" 
-  accept="audio/*" 
-  class="hidden"
-  @change="handleFileChange"
-/>
-</label>
+<div v-if="selectedUser" class="p-4 bg-zinc-900 border-t border-zinc-700/70">
+  <form @submit.prevent="handleSend" class="flex flex-col gap-2">
+    
+    <!-- 1-ci sıra: Input + Send -->
+    <div class="flex items-center gap-2">
+      <input 
+        v-model="messageInput"
+        @keydown="handleKeyDown"
+        type="text" 
+        placeholder="Mesajınızı yazın..." 
+        class="flex-1 rounded-xl bg-zinc-800 border border-zinc-700 
+               text-sm sm:text-base text-zinc-200 
+               px-2 py-1.5 sm:px-4 sm:py-2.5 
+               focus:outline-none focus:ring-2 focus:ring-[#777c5c]"
+      />
 
-          <!--! Fayl seçmək -->
-
-           <!--! Mikrofon -->
-
-<VoiceRecorder 
-  mode="private" 
-  @stop="handleRecorderStop" 
-/>
-          <!--! Mikrofon -->
-
-        <button 
-          type="submit"
-          :disabled="!messageInput.trim()"
-          class="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center bg-linear-to-br from-[#b4c279] to-[#c6d484] hover:from-[#a9b672] hover:to-[#666e43] 
-          disabled:opacity-50 disabled:cursor-not-allowed rounded-2xl text-zinc-900 font-bold text-xl sm:text-2xl transition-all active:scale-95"
-        >
-          ↑
-        </button>
-      </form>
+      <button 
+        type="submit"
+        :disabled="!messageInput.trim()"
+        class="w-8 h-8 sm:w-12 sm:h-12 flex items-center justify-center 
+               bg-linear-to-br from-[#b4c279] to-[#c6d484] 
+               hover:from-[#a9b672] hover:to-[#666e43] 
+               disabled:opacity-50 disabled:cursor-not-allowed 
+               rounded-2xl text-zinc-900 font-bold 
+               text-lg sm:text-2xl transition-all active:scale-95"
+      >
+        ↑
+      </button>
     </div>
+
+    <!-- 2-ci sıra: İkon + Mikrofon -->
+    <div class="flex gap-2 items-center justify-between">
+      <label class="cursor-pointer">
+        📎
+        <input 
+          type="file" 
+          accept="audio/*" 
+          class="hidden"
+          @change="handleFileChange"
+        />
+      </label>
+      <VoiceRecorder mode="private" @stop="handleRecorderStop" />
+    </div>
+
+  </form>
+</div>
 
   </div>
 </template>

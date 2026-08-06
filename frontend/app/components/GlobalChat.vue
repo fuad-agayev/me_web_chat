@@ -278,48 +278,55 @@ const handleGlobalRecorderStop = async (file: File, mode: string) => {
     </div>
 
     <!-- Input Area -->
-    <div class="p-3 sm:p-4 border-t border-zinc-800 bg-zinc-900">
-      <div class="flex items-center gap-2 sm:gap-3">
-        <input
-          v-if="user"
-          v-model="text"
-          @input="startGlobalTyping(user.id, user.username)"
-          @blur="stopGlobalTyping(user.id, user.username)"
-          @keyup.enter="send"
-          placeholder="Type a message..."
-          class="flex-1 bg-zinc-800 border border-zinc-700 focus:border-[#666e43] focus:ring-0 rounded-3xl px-4 sm:px-6 py-3 text-sm sm:text-base text-white placeholder-zinc-500 outline-none transition-all"
-        />
+    <!-- Input Area -->
+<div class="p-3 sm:p-4 border-t border-zinc-800 bg-zinc-900">
+  <form @submit.prevent="send" class="flex flex-col gap-3">
+    
+    <!-- 1-ci sıra: Input + Send -->
+    <div class="flex items-center gap-2 sm:gap-3">
+      <input
+        v-if="user"
+        v-model="text"
+        @input="startGlobalTyping(user.id, user.username)"
+        @blur="stopGlobalTyping(user.id, user.username)"
+        @keyup.enter="send"
+        placeholder="Type a message..."
+        class="flex-1 bg-zinc-800 border border-zinc-700 focus:border-[#666e43] 
+               rounded-3xl px-4 sm:px-6 py-2 sm:py-3 
+               text-sm sm:text-base text-white placeholder-zinc-500 
+               outline-none transition-all"
+      />
 
-        
-           <!--! Fayl seçmək -->
-<label>
-  📎
-  <input 
-    type="file" 
-    accept="audio/*" 
-    class="hidden"
-    @change="handleGlobalFileChange"
-  />
-</label>
-          <!--! Fayl seçmək -->
- 
-
-
-           <!--! Mikrofon -->
-<VoiceRecorder 
-  mode="global" 
-  @stop="handleGlobalRecorderStop" 
-/>
-          <!--! Mikrofon -->
-
-        <button 
-          @click="send"
-          :disabled="!text.trim()"
-          class="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center bg-linear-to-br from-[#b4c279] to-[#c6d484] hover:from-[#a9b672] hover:to-[#666e43] disabled:opacity-50 disabled:cursor-not-allowed rounded-2xl text-zinc-900 font-bold text-xl sm:text-2xl transition-all active:scale-95"
-        >
-          ↑
-        </button>
-      </div>
+      <button 
+        @click="send"
+        :disabled="!text.trim()"
+        class="w-8 h-8 sm:w-12 sm:h-12 flex items-center justify-center 
+               bg-linear-to-br from-[#b4c279] to-[#c6d484] 
+               hover:from-[#a9b672] hover:to-[#666e43] 
+               disabled:opacity-50 disabled:cursor-not-allowed 
+               rounded-2xl text-zinc-900 font-bold 
+               text-lg sm:text-2xl transition-all active:scale-95"
+      >
+        ↑
+      </button>
     </div>
+
+    <!-- 2-ci sıra: Fayl + Mikrofon -->
+    <div class="flex gap-3 items-center">
+      <label class="cursor-pointer">
+        📎
+        <input 
+          type="file" 
+          accept="audio/*" 
+          class="hidden"
+          @change="handleGlobalFileChange"
+        />
+      </label>
+      <VoiceRecorder mode="global" @stop="handleGlobalRecorderStop" />
+    </div>
+
+  </form>
+</div>
+
   </div>
 </template>
