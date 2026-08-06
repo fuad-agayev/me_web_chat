@@ -3,6 +3,8 @@
 
 
 # Chat Web Application
+<img src="./docs/global_docs.png" alt="Global Chat Screenshot" width="400"/>
+<img src="./docs/private_docs.png" alt="Private Chat Screenshot" width="400"/>
 
 Live Demo: [https://me-web-chat.vercel.app](https://me-web-chat.vercel.app)
 
