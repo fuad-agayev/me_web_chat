@@ -91,6 +91,12 @@ watch(messages, () => {
   scrollToBottom();
 }, { deep: true });
 
+const playSendSound = () => {
+  const audio = new Audio('/sounds/send.mp3');
+  audio.play();
+};
+
+
 // Send mesajı
 const send = () => {
   if (!text.value.trim()) return;
@@ -98,6 +104,7 @@ const send = () => {
   text.value = "";
   shouldAutoScroll.value = true; // Kendi mesajımızda kesin alta in
   scrollToBottom();
+  playSendSound();
 };
 
 onMounted(async () => {

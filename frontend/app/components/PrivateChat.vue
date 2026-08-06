@@ -105,11 +105,19 @@ const handleKeyDown = () => {
   }, 2000);
 };
 
+
+const playSendSound = () => {
+  const audio = new Audio('/sounds/send.mp3');
+  audio.play();
+};
+
+
 const handleSend = () => {
   if (!messageInput.value.trim() || !props.selectedUser) return;
   sendMessage(messageInput.value, props.selectedUser.id);
   messageInput.value = "";
   stopTyping(props.selectedUser.id);
+  playSendSound();
 };
 
 const startEdit = (msg: any) => {
