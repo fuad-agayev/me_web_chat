@@ -378,7 +378,7 @@ const handleRecorderStop = async (file: File, mode: string) => {
         :disabled="!messageInput.trim()"
         class="w-8 h-8 sm:w-12 sm:h-12 flex items-center justify-center 
                bg-linear-to-br from-[#b4c279] to-[#c6d484] 
-               hover:from-[#a9b672] hover:to-[#666e43] 
+               hover:from-[#74dfb2] hover:to-[#9fdbb8] 
                disabled:opacity-50 disabled:cursor-not-allowed 
                rounded-2xl text-zinc-900 font-bold 
                text-lg sm:text-2xl transition-all active:scale-95"
