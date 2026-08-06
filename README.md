@@ -4,7 +4,7 @@
 
 # Chat Web Application
 
-Live Demo: [https://me-web-chat.vercel.app](https://me-web-chat.vercel.app)
+Live production: [https://me-web-chat.vercel.app](https://me-web-chat.vercel.app)
 
 ## Screenshots
 
