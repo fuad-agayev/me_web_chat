@@ -288,11 +288,10 @@ const handleRecorderStop = async (file: File, mode: string) => {
   <p v-if="msg.deleted" class="flex items-center gap-1 text-xs text-zinc-500">
     🚫 This message deleted
   </p>
- <div v-else class="flex flex-col gap-2">
+  <div v-else class="flex flex-col gap-2">
   <p v-if="msg.content" class="whitespace-pre-wrap break-all">{{ msg.content }}</p>
   <AudioPlayer v-if="msg.audio_url" :src="msg.audio_url" />
-</div>
-  
+  </div>
 </div>
 <!--         
               <div v-else>
