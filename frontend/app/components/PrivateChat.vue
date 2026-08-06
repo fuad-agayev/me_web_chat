@@ -106,18 +106,11 @@ const handleKeyDown = () => {
 };
 
 
-const playSendSound = () => {
-  const audio = new Audio('/sounds/swish_voice.mp3');
-  audio.play();
-};
-
-
 const handleSend = () => {
   if (!messageInput.value.trim() || !props.selectedUser) return;
   sendMessage(messageInput.value, props.selectedUser.id);
   messageInput.value = "";
   stopTyping(props.selectedUser.id);
-  playSendSound();
 };
 
 const startEdit = (msg: any) => {
@@ -165,9 +158,11 @@ const toggleReaction = (msgId: number, emoji: string) => {
   if (existingReaction) {
     // EĞER VARSA SİL
     removeReaction(Number(msgId), emoji, Number(props.selectedUser.id));
+    playSendSound();
   } else {
     // YOKSA EKLE
     addReaction(Number(msgId), emoji, Number(props.selectedUser.id));
+    playSendSound();
   }
   
   activeEmojiMenuId.value = null; 
@@ -177,8 +172,13 @@ const toggleReaction = (msgId: number, emoji: string) => {
 
 const toggleEmojiMenu = (msgId: number) => {
   activeEmojiMenuId.value = activeEmojiMenuId.value === msgId ? null : msgId;
+  playSendSound();
 };
 
+const playSendSound = () => {
+  const audio = new Audio('/sounds/swish_voice.mp3');
+  audio.play();
+};
 
 const handleFileChange = async (e: Event) => {
   const input = e.target as HTMLInputElement;
@@ -186,6 +186,7 @@ const handleFileChange = async (e: Event) => {
   if (file && chatSelectedUser.value) {
     const res = await sendAudioMessage(file, chatSelectedUser.value);
     sendMessage("", chatSelectedUser.value, res.audio_url); // socket emit
+    playSendSound();
   }
 };
 
@@ -193,6 +194,7 @@ const handleRecorderStop = async (file: File, mode: string) => {
   if (mode === "private" && chatSelectedUser.value) {
     const res = await sendAudioMessage(file, chatSelectedUser.value);
     sendMessage("", chatSelectedUser.value, res.audio_url);
+    playSendSound();
   }
 };
 </script>

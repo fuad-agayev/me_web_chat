@@ -91,11 +91,6 @@ watch(messages, () => {
   scrollToBottom();
 }, { deep: true });
 
-const playSendSound = () => {
-  const audio = new Audio('/sounds/swish_voice.mp3');
-  audio.play();
-};
-
 
 // Send mesajı
 const send = () => {
@@ -104,7 +99,6 @@ const send = () => {
   text.value = "";
   shouldAutoScroll.value = true; // Kendi mesajımızda kesin alta in
   scrollToBottom();
-  playSendSound();
 };
 
 onMounted(async () => {
@@ -167,6 +161,11 @@ const stopPress = () => {
   clearTimeout(timer);
 };
 
+const playSendSound = () => {
+  const audio = new Audio('/sounds/swish_voice.mp3');
+  audio.play();
+};
+
 
 const handleGlobalFileChange = async (e: Event) => {
   const input = e.target as HTMLInputElement;
@@ -174,6 +173,7 @@ const handleGlobalFileChange = async (e: Event) => {
   if (file) {
     const res = await sendGlobalAudioMessage(file); // upload + audio_url
     sendGlobalMessage("", res.audio_url);           // socket emit
+    playSendSound();
   }
 };
 
@@ -181,6 +181,7 @@ const handleGlobalRecorderStop = async (file: File, mode: string) => {
   if (mode === "global") {
     const res = await sendGlobalAudioMessage(file);
     sendGlobalMessage("", res.audio_url);
+    playSendSound();
   }
 };
 
