@@ -1,6 +1,6 @@
 
 <template>
-  <audio v-if="props.src" controls class="sm:w-64 md:w-80 lg:w-96 h-12 mt-2">
+  <audio v-if="props.src" controls class="w-64 sm:w-64 md:w-80 lg:w-96 h-12 mt-2">
   <source :src="props.src" type="audio/mpeg" />
   <source :src="props.src" type="audio/m4a" />
   <source :src="props.src" type="audio/webm" />
