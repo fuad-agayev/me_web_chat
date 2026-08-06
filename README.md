@@ -10,11 +10,11 @@ Live Demo: [https://me-web-chat.vercel.app](https://me-web-chat.vercel.app)
 
 ### Global Chat
 
-![Global Chat Screenshot](./docs/global_docs.png)
+![Global Chat Screenshot](./frontend/public/docs/global_docs.png)
 
 ### Private Chat
 
-![Private Chat Screenshot](./docs/private_docs.png)
+![Private Chat Screenshot](./frontend/public/docs/private_docs.png)
 
 ## Features
 
