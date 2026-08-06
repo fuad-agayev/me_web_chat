@@ -290,7 +290,7 @@ const handleRecorderStop = async (file: File, mode: string) => {
   </p>
   <div v-else class="flex flex-col gap-2">
   <p v-if="msg.content" class="whitespace-pre-wrap break-all">{{ msg.content }}</p>
-  <AudioPlayer v-if="msg.audio_url" :src="msg.audio_url" class="w-64 sm:w-64 md:w-80 lg:w-96 h-12 mt-2"/>
+  <AudioPlayer v-if="msg.audio_url" :src="msg.audio_url"/>
   </div>
 </div>
 <!--         
