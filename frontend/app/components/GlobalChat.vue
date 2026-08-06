@@ -92,7 +92,7 @@ watch(messages, () => {
 }, { deep: true });
 
 const playSendSound = () => {
-  const audio = new Audio('/sounds/send.mp3');
+  const audio = new Audio('/sounds/swish_voice.mp3');
   audio.play();
 };
 
