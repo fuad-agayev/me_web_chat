@@ -253,10 +253,10 @@ const handleGlobalRecorderStop = async (file: File, mode: string) => {
                 <template v-if="m.deleted">
                   <span class="italic text-zinc-500">Message deleted</span>
                 </template>
-                <template v-else>
-                  <p class=""> {{ m.content }} </p>
-                   <AudioPlayer v-if="m.audio_url" :src="m.audio_url" />
-                </template>
+                <div v-else class="flex flex-col gap-2">
+  <p v-if="m.content" class="whitespace-pre-wrap break-all">{{ m.content }}</p>
+  <AudioPlayer v-if="m.audio_url" :src="m.audio_url" />
+</div>
                  
                 <div 
                      v-if="m.sender_id === user?.id"
