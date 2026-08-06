@@ -358,6 +358,7 @@ const handleRecorderStop = async (file: File, mode: string) => {
       </div>
     </div>
 
+<<<<<<< HEAD
 
 <div v-if="selectedUser" class="p-4 bg-zinc-900 border-t border-zinc-700/70">
   <form @submit.prevent="handleSend" class="flex flex-col gap-2">
@@ -387,6 +388,48 @@ const handleRecorderStop = async (file: File, mode: string) => {
       >
         ↑
       </button>
+=======
+    <div v-if="selectedUser" class="p-4 bg-zinc-900 border-t border-zinc-700/70">
+      <form @submit.prevent="handleSend" class="flex items-center gap-2">
+        <input 
+          v-model="messageInput"
+          @keydown="handleKeyDown"
+          type="text" 
+          placeholder="Mesajınızı yazın..." 
+          class="flex-1 px-4 py-2.5 rounded-xl bg-zinc-800 text-sm text-zinc-200 border border-zinc-700 focus:outline-none focus:ring-2 focus:ring-[#777c5c]"
+        />
+<div class="flex flex-col sm:flex-row gap-2 items-center">
+           <!--! Fayl seçmək -->
+<label>
+    📎
+<input 
+  type="file" 
+  accept="audio/*" 
+  class="hidden"
+  @change="handleFileChange"
+/>
+</label>
+
+          <!--! Fayl seçmək -->
+
+           <!--! Mikrofon -->
+
+<VoiceRecorder 
+  mode="private" 
+  @stop="handleRecorderStop" 
+/>
+          <!--! Mikrofon -->
+</div>
+        <button 
+          type="submit"
+          :disabled="!messageInput.trim()"
+          class="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center bg-linear-to-br from-[#b4c279] to-[#c6d484] hover:from-[#a9b672] hover:to-[#666e43] 
+          disabled:opacity-50 disabled:cursor-not-allowed rounded-2xl text-zinc-900 font-bold text-xl sm:text-2xl transition-all active:scale-95"
+        >
+          ↑
+        </button>
+      </form>
+>>>>>>> 23edef103b78b4766010ca9b48e375337f13b4ba
     </div>
 
     <!-- 2-ci sıra: İkon + Mikrofon -->

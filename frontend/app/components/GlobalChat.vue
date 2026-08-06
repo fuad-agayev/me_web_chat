@@ -297,6 +297,7 @@ const handleGlobalRecorderStop = async (file: File, mode: string) => {
                outline-none transition-all"
       />
 
+<<<<<<< HEAD
       <button 
         @click="send"
         :disabled="!text.trim()"
@@ -309,6 +310,38 @@ const handleGlobalRecorderStop = async (file: File, mode: string) => {
       >
         ↑
       </button>
+=======
+        <div class="flex flex-col sm:flex-row gap-2 items-center">
+           <!--! Fayl seçmək -->
+<label>
+  📎
+  <input 
+    type="file" 
+    accept="audio/*" 
+    class="hidden"
+    @change="handleGlobalFileChange"
+  />
+</label>
+          <!--! Fayl seçmək -->
+ 
+
+
+           <!--! Mikrofon -->
+<VoiceRecorder 
+  mode="global" 
+  @stop="handleGlobalRecorderStop" 
+/>
+          <!--! Mikrofon -->
+</div>
+        <button 
+          @click="send"
+          :disabled="!text.trim()"
+          class="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center bg-linear-to-br from-[#b4c279] to-[#c6d484] hover:from-[#a9b672] hover:to-[#666e43] disabled:opacity-50 disabled:cursor-not-allowed rounded-2xl text-zinc-900 font-bold text-xl sm:text-2xl transition-all active:scale-95"
+        >
+          ↑
+        </button>
+      </div>
+>>>>>>> 23edef103b78b4766010ca9b48e375337f13b4ba
     </div>
 
     <!-- 2-ci sıra: Fayl + Mikrofon -->
